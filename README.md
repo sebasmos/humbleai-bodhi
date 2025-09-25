@@ -4,7 +4,7 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/openai/simple-evals.git
+git clone https://github.com/sebasmos/HumbleAILLMs.git
 
 # Install dependencies
 pip install torch transformers accelerate openai anthropic human-eval
