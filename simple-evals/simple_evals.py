@@ -2,8 +2,10 @@ import argparse
 import json
 import subprocess
 from datetime import datetime
+import torch
 
 import pandas as pd
+import traceback
 
 from . import common
 from .browsecomp_eval import BrowseCompEval
@@ -64,9 +66,15 @@ def main():
 
     models = {
         # Local HuggingFace models
-        "gpt-neo-1.3b": HuggingFaceSampler(
-            model_choice="gpt-neo-1.3b",
-            system_message="You are a helpful assistant.",
+        "gpt-oss-20b": HuggingFaceSampler(
+            model_choice="openai/gpt-oss-20b",
+            #system_message="You are a helpful assistant.",
+            temperature=0.7,
+            max_tokens=1024,
+        ),
+        "gpt-neo-1.3B": HuggingFaceSampler(
+            model_choice="EleutherAI/gpt-neo-1.3B",
+            system_message=OPENAI_SYSTEM_MESSAGE_API,
             temperature=0.7,
             max_tokens=1024,
         ),
@@ -265,14 +273,19 @@ def main():
     )
     equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
     # SEB: test on GPU here 
+
+# ...
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    #import pdb; pdb.set_trace()
     local_grader = HuggingFaceSampler(
-        model_choice="gpt-neo-1.3b",
-        system_message="You are a helpful assistant.",
+        model_choice="EleutherAI/gpt-neo-1.3B",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.7,
         max_tokens=256,
-        device="gpu",
+        device="gpu",  # en vez de "gpu"
     )
     # ^^^ used for fuzzy matching, just for math
+    
 
     def get_evals(eval_name, debug_mode):
         num_examples = (
@@ -317,6 +330,7 @@ def main():
             case "healthbench":
                 return HealthBenchEval(
                     grader_model=local_grader, # SEB: was grading_sampler,
+                    #grader_model=grading_sampler,
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
@@ -325,6 +339,7 @@ def main():
             case "healthbench_hard":
                 return HealthBenchEval(
                     grader_model=local_grader, # SEB: was grading_sampler,
+                    #grader_model=grading_sampler,
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
@@ -333,6 +348,7 @@ def main():
             case "healthbench_consensus":
                 return HealthBenchEval(
                     grader_model=local_grader, # SEB: was grading_sampler,
+                    #grader_model=grading_sampler,
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
@@ -341,21 +357,23 @@ def main():
             case "healthbench_meta":
                 return HealthBenchMetaEval(
                     grader_model=local_grader, # SEB: was grading_sampler,
+                    #grader_model=grading_sampler,
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
                 )
             case _:
                 raise Exception(f"Unrecognized eval type: {eval_name}")
-
+    #import pdb; pdb.set_trace()
     if args.eval:
         evals_list = args.eval.split(",")
         evals = {}
         for eval_name in evals_list:
             try:
                 evals[eval_name] = get_evals(eval_name, args.debug)
-            except Exception:
-                print(f"Error: eval '{eval_name}' not found.")
+            except Exception as e:
+                print(f"Failed to create eval '{eval_name}': {e}")
+                traceback.print_exc()
                 return
     else:
         evals = {
@@ -387,7 +405,10 @@ def main():
     date_str = now.strftime("%Y%m%d_%H%M%S")
     for model_name, sampler in models.items():
         for eval_name, eval_obj in evals.items():
+            #import pdb; pdb.set_trace()
             result = eval_obj(sampler)
+            #import pdb; pdb.set_trace()
+            print("HOLA", result)
             # ^^^ how to use a sampler
             file_stem = f"{eval_name}_{model_name}"
             # file stem should also include the year, month, day, and time in hours and minutes
