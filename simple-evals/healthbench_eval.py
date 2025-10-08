@@ -415,7 +415,7 @@ class HealthBenchEval(Eval):
             
             while True:
                 sampler_response = self.grader_model(messages)
-                print(sampler_response)
+                
                 grading_response = sampler_response.response_text
                 grading_response_dict = parse_json_to_dict(grading_response)
                 

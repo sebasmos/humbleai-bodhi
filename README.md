@@ -31,8 +31,8 @@ python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=mmlu --examples=
 
 ```bash
 # Multiple choice (no grader needed)
-python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=mmlu --examples=10 --debug
-python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=gpqa --examples=5 --debug
+python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=mmlu --examples=1 --debug
+python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=gpqa --examples=1 --debug
 
 # Math and reasoning
 python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=mgsm --examples=5 --debug
@@ -45,7 +45,8 @@ python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=drop --examples=
 # Standard HealthBench
 python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=healthbench --examples=1
 
-python -m simple-evals.simple_evals --model=gpt-4.1 --eval=healthbench --examples=10 --debug
+python -m simple-evals.simple_evals --model=gpt-4.1 --eval=healthbench --examples=10 
+
 # Challenging subset
 python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=healthbench_hard --examples=5 --debug
 
