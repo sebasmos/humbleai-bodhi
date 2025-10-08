@@ -272,20 +272,7 @@ def main():
         max_tokens=2048,
     )
     equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
-    # SEB: test on GPU here 
-
-# ...
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    #import pdb; pdb.set_trace()
-    local_grader = HuggingFaceSampler(
-        model_choice="EleutherAI/gpt-neo-1.3B",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        temperature=0.7,
-        max_tokens=256,
-        device="gpu",  # en vez de "gpu"
-    )
     # ^^^ used for fuzzy matching, just for math
-    
 
     def get_evals(eval_name, debug_mode):
         num_examples = (
@@ -329,8 +316,7 @@ def main():
                 )
             case "healthbench":
                 return HealthBenchEval(
-                    grader_model=local_grader, # SEB: was grading_sampler,
-                    #grader_model=grading_sampler,
+                    grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
@@ -338,8 +324,7 @@ def main():
                 )
             case "healthbench_hard":
                 return HealthBenchEval(
-                    grader_model=local_grader, # SEB: was grading_sampler,
-                    #grader_model=grading_sampler,
+                    grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
@@ -347,8 +332,7 @@ def main():
                 )
             case "healthbench_consensus":
                 return HealthBenchEval(
-                    grader_model=local_grader, # SEB: was grading_sampler,
-                    #grader_model=grading_sampler,
+                    grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
@@ -356,8 +340,7 @@ def main():
                 )
             case "healthbench_meta":
                 return HealthBenchMetaEval(
-                    grader_model=local_grader, # SEB: was grading_sampler,
-                    #grader_model=grading_sampler,
+                    grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,

@@ -43,7 +43,7 @@ class HuggingFaceSampler(SamplerBase):
     def __init__(
         self,
         *,
-        model_choice: str = "gpt-neo-1.3B",
+        model_choice: str = "EleutherAI/gpt-neo-1.3B",
         system_message: str | None = None,
         max_tokens: int = 256,
         temperature: float = 0.7,
