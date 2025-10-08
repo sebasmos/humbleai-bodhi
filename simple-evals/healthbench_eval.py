@@ -166,6 +166,17 @@ def get_usage_dict(response_usage) -> dict[str, int | None]:
             "total_tokens": None,
         }
 
+    # Handle dict-based usage (HuggingFace and similar)
+    if isinstance(response_usage, dict):
+        return {
+            "input_tokens": response_usage.get("prompt_tokens"),
+            "input_cached_tokens": response_usage.get("prompt_tokens_details", {}).get("cached_tokens", 0),
+            "output_tokens": response_usage.get("completion_tokens"),
+            "output_reasoning_tokens": response_usage.get("completion_tokens_details", {}).get("reasoning_tokens", 0),
+            "total_tokens": response_usage.get("total_tokens"),
+        }
+
+    # Handle OpenAI-style objects
     try:
         return {
             "input_tokens": response_usage.input_tokens,
@@ -396,34 +407,31 @@ class HealthBenchEval(Eval):
             convo_str = "\n\n".join(
                 [f"{m['role']}: {m['content']}" for m in convo_with_response]
             )
-            # import pdb; pdb.set_trace()
             grader_prompt = GRADER_TEMPLATE.replace(
                 "<<conversation>>", convo_str
             ).replace("<<rubric_item>>", str(rubric_item))
-            # import pdb; pdb.set_trace()
+            
             messages: MessageList = [dict(content=grader_prompt, role="user")]
-            # import pdb; pdb.set_trace()
+            
             while True:
                 sampler_response = self.grader_model(messages)
-                # import pdb; pdb.set_trace()
+                print(sampler_response)
                 grading_response = sampler_response.response_text
-                # import pdb; pdb.set_trace()
                 grading_response_dict = parse_json_to_dict(grading_response)
-                import pdb; pdb.set_trace()
+                
                 if "criteria_met" in grading_response_dict:
                     label = grading_response_dict["criteria_met"]
-                    import pdb; pdb.set_trace()
+                    
                     if label is True or label is False:
                         break
                 print("Grading failed due to bad JSON output, retrying...")
             return grading_response_dict
-        #TODO: review everything below
+        
         grading_response_list = common.map_with_progress(
             grade_rubric_item,
             rubric_items,
             pbar=False,
         )
-        import pdb; pdb.set_trace()
 
         # compute the overall score
         overall_score = calculate_score(rubric_items, grading_response_list)
