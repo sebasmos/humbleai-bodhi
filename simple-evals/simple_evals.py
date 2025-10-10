@@ -54,8 +54,8 @@ def main():
     parser.add_argument(
         "--n-threads",
         type=int,
-        default=120,
-        help="Number of threads to run. Only supported for HealthBench and HealthBenchMeta.",
+        default=5,
+        help="Number of threads to run. Only supported for HealthBench and HealthBenchMeta. Default is 5 to avoid API rate limits.",
     )
     parser.add_argument("--debug", action="store_true", help="Run in debug mode")
     parser.add_argument(
@@ -319,7 +319,7 @@ def main():
                     grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
-                    n_threads=args.n_threads or 1,
+                    n_threads=args.n_threads,
                     subset_name=None,
                 )
             case "healthbench_hard":
@@ -327,7 +327,7 @@ def main():
                     grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
-                    n_threads=args.n_threads or 1,
+                    n_threads=args.n_threads,
                     subset_name="hard",
                 )
             case "healthbench_consensus":
@@ -335,7 +335,7 @@ def main():
                     grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
-                    n_threads=args.n_threads or 1,
+                    n_threads=args.n_threads,
                     subset_name="consensus",
                 )
             case "healthbench_meta":
@@ -343,7 +343,7 @@ def main():
                     grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
-                    n_threads=args.n_threads or 1,
+                    n_threads=args.n_threads,
                 )
             case _:
                 raise Exception(f"Unrecognized eval type: {eval_name}")

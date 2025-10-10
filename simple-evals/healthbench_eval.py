@@ -17,6 +17,8 @@ import hashlib
 import json
 import random
 import re
+import threading
+import time
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -284,7 +286,7 @@ class HealthBenchEval(Eval):
         physician_completions_mode: str | None = None,
         # If True, run the grader on reference completions used by physicians, and physician_completions_mode must be set.
         run_reference_completions: bool = False,
-        n_threads: int = 120,
+        n_threads: int = 5,
         subset_name: Literal["hard", "consensus"] | None = None,
     ):
         if run_reference_completions:
@@ -392,6 +394,29 @@ class HealthBenchEval(Eval):
         self.examples = examples * n_repeats
         self.n_threads = n_threads
         self.grader_model = grader_model
+        # Rate limiter for grader API calls to prevent 403 errors
+        self._grader_lock = threading.Lock()
+        self._last_grader_call_time = 0
+        self._min_grader_delay = 0.5  # 500ms between grader calls (max ~2 calls/sec) - conservative to avoid 403
+
+    def _rate_limited_grader_call(self, messages):
+        """Thread-safe rate-limited grader API call to prevent 403 errors."""
+        with self._grader_lock:
+            # Calculate time since last call
+            current_time = time.time()
+            time_since_last_call = current_time - self._last_grader_call_time
+
+            # If we're calling too fast, sleep for the remaining time
+            if time_since_last_call < self._min_grader_delay:
+                time.sleep(self._min_grader_delay - time_since_last_call)
+
+            # Make the API call
+            response = self.grader_model(messages)
+
+            # Update last call time
+            self._last_grader_call_time = time.time()
+
+            return response
 
     def grade_sample(
         self,
@@ -412,9 +437,9 @@ class HealthBenchEval(Eval):
             ).replace("<<rubric_item>>", str(rubric_item))
             
             messages: MessageList = [dict(content=grader_prompt, role="user")]
-            
+
             while True:
-                sampler_response = self.grader_model(messages)
+                sampler_response = self._rate_limited_grader_call(messages)
                 
                 grading_response = sampler_response.response_text
                 grading_response_dict = parse_json_to_dict(grading_response)

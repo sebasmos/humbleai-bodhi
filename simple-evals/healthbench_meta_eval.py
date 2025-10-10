@@ -8,6 +8,8 @@ To run, use the following command (working directory should contain simple-evals
 
 import json
 import random
+import threading
+import time
 from collections import defaultdict
 from typing import Literal
 
@@ -35,7 +37,7 @@ class HealthBenchMetaEval(Eval):
         self,
         grader_model: SamplerBase,
         num_examples: int | None = None,
-        n_threads: int = 120,
+        n_threads: int = 5,
         n_repeats: int = 1,
     ):
         with bf.BlobFile(INPUT_PATH, "rb") as f:
@@ -50,6 +52,29 @@ class HealthBenchMetaEval(Eval):
         self.examples = examples * n_repeats
         self.grader_model = grader_model
         self.n_threads = n_threads
+        # Rate limiter for grader API calls to prevent 403 errors
+        self._grader_lock = threading.Lock()
+        self._last_grader_call_time = 0
+        self._min_grader_delay = 0.5  # 500ms between grader calls (max ~2 calls/sec) - conservative to avoid 403
+
+    def _rate_limited_grader_call(self, messages):
+        """Thread-safe rate-limited grader API call to prevent 403 errors."""
+        with self._grader_lock:
+            # Calculate time since last call
+            current_time = time.time()
+            time_since_last_call = current_time - self._last_grader_call_time
+
+            # If we're calling too fast, sleep for the remaining time
+            if time_since_last_call < self._min_grader_delay:
+                time.sleep(self._min_grader_delay - time_since_last_call)
+
+            # Make the API call
+            response = self.grader_model(messages)
+
+            # Update last call time
+            self._last_grader_call_time = time.time()
+
+            return response
 
     def grade_sample(
         self,
@@ -86,7 +111,7 @@ class HealthBenchMetaEval(Eval):
             grader_convo = [dict(content=grader_prompt, role="user")]
 
             while True:
-                sampler_response = sampler(grader_convo)
+                sampler_response = self._rate_limited_grader_call(grader_convo)
                 response_text = sampler_response.response_text
                 actual_queried_grader_convo = (
                     sampler_response.actual_queried_message_list
