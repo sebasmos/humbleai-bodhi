@@ -390,8 +390,6 @@ def main():
         for eval_name, eval_obj in evals.items():
             #import pdb; pdb.set_trace()
             result = eval_obj(sampler)
-            #import pdb; pdb.set_trace()
-            print("HOLA", result)
             # ^^^ how to use a sampler
             file_stem = f"{eval_name}_{model_name}"
             # file stem should also include the year, month, day, and time in hours and minutes
@@ -404,7 +402,6 @@ def main():
             metrics = result.metrics | {"score": result.score}
             # Sort metrics by key
             metrics = dict(sorted(metrics.items()))
-            print(metrics)
             result_filename = f"/tmp/{file_stem}{debug_suffix}.json"
             with open(result_filename, "w") as f:
                 f.write(json.dumps(metrics, indent=2))
