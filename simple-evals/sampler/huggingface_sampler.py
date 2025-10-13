@@ -1,4 +1,5 @@
 import time
+import os
 from typing import Any, Optional, List, Dict
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -106,6 +107,9 @@ class HuggingFaceSampler(SamplerBase):
         torch_dtype = self._infer_dtype(device)
         self._device_str = device
 
+        # Get HuggingFace token from environment (similar to OPENAI_API_KEY)
+        hf_token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_TOKEN")
+
         quantization_str = ""
         if self.load_in_8bit:
             quantization_str = " (8-bit quantization)"
@@ -113,7 +117,11 @@ class HuggingFaceSampler(SamplerBase):
             quantization_str = " (4-bit quantization)"
 
         print(f"Loading model {self.model_id} on {device} (dtype={torch_dtype}){quantization_str} ...")
-        tokenizer = AutoTokenizer.from_pretrained(self.model_id, trust_remote_code=self.trust_remote_code)
+        tokenizer = AutoTokenizer.from_pretrained(
+            self.model_id,
+            trust_remote_code=self.trust_remote_code,
+            token=hf_token
+        )
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
 
@@ -122,6 +130,7 @@ class HuggingFaceSampler(SamplerBase):
         # Prepare model loading kwargs
         model_kwargs = {
             "trust_remote_code": self.trust_remote_code,
+            "token": hf_token,
         }
 
         if self.load_in_8bit:

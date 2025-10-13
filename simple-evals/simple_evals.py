@@ -78,7 +78,30 @@ def main():
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
-                # Model is already quantized with Mxfp4, no additional quantization needed
+            ),
+            "medgemma-4b-it": lambda: HuggingFaceSampler(
+                model_choice="google/medgemma-4b-it",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
+            ),
+            "medgemma-4b-pt": lambda: HuggingFaceSampler(
+                model_choice="google/medgemma-4b-pt",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
+            ),
+            "medgemma-27b-it": lambda: HuggingFaceSampler(
+                model_choice="google/medgemma-27b-it",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
+            ),
+            "medgemma-27b-text-it": lambda: HuggingFaceSampler(
+                model_choice="google/medgemma-27b-text-it",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
             ),
             # Reasoning Models
             "o3": lambda: ResponsesSampler(
@@ -255,7 +278,8 @@ def main():
 
     # Get list of all available models from the factory
     available_models = [
-        "gpt-neo-1.3b", "gpt-oss-20b", "o3", "o3-temp-1", "o3_high", "o3_low",
+    "gpt-neo-1.3b", "gpt-oss-20b", "medgemma-4b-it", "medgemma-4b-pt", "medgemma-27b-it",
+    "medgemma-27b-text-it", "o3", "o3-temp-1", "o3_high", "o3_low",
         "o4-mini", "o4-mini_high", "o4-mini_low", "o1-pro", "o1", "o1_high", "o1_low",
         "o1-preview", "o1-mini", "o3-mini", "o3-mini_high", "o3-mini_low",
         "gpt-4.1", "gpt-4.1-temp-1", "gpt-4.1-mini", "gpt-4.1-nano",

@@ -7,11 +7,14 @@
 git clone https://github.com/sebasmos/HumbleAILLMs.git
 
 # Install dependencies
-pip install torch transformers accelerate openai anthropic human-eval
+pip install torch transformers accelerate openai anthropic human-eval bitsandbytes
 
 # Optional: Set API keys for cloud models (not needed for local models)
 export OPENAI_API_KEY="your-key-here"
 export ANTHROPIC_API_KEY="your-key-here"
+
+# Optional: Set HuggingFace token for gated models (MedGemma, etc.)
+export HF_TOKEN="your-hf-token-here"  # Get from https://huggingface.co/settings/tokens
 ```
 
 ## Quick Test
@@ -27,6 +30,25 @@ python -m simple-evals.simple_evals --model=gpt-4.1 --eval=mmlu --examples=1
 python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=mmlu --examples=10
 ```
 
+## Available Local Models
+
+```bash
+# General purpose models
+gpt-neo-1.3b         # 1.3B parameter general model
+gpt-oss-20b          # 20B parameter model (requires >6GB VRAM or CPU)
+
+# Medical models (require HF_TOKEN and license acceptance)
+medgemma-4b-it         # 4B instruction-tuned model (default MedGemma choice)
+medgemma-4b-pt         # 4B base model for custom fine-tuning
+medgemma-27b-it        # 27B instruction-tuned model (high accuracy, heavy VRAM)
+medgemma-27b-text-it   # 27B instruction-tuned, text-only variant
+                       # Accept licenses via Hugging Face:
+                       # https://huggingface.co/google/medgemma-4b-it
+                       # https://huggingface.co/google/medgemma-4b-pt
+                       # https://huggingface.co/google/medgemma-27b-it
+                       # https://huggingface.co/google/medgemma-27b-text-it
+```
+
 ## Basic Evaluations (Local Models)
 
 ```bash
@@ -37,6 +59,12 @@ python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=gpqa --examples=
 # Math and reasoning
 python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=mgsm --examples=5 --debug
 python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=drop --examples=5 --debug
+
+# Medical evaluation with MedGemma (requires HF_TOKEN)
+export HF_TOKEN="hf_your_token_here"
+python -m simple-evals.simple_evals --model=medgemma-4b-it --eval=healthbench --examples=5
+# Or try the larger variant
+python -m simple-evals.simple_evals --model=medgemma-27b-it --eval=healthbench --examples=5
 ```
 
 ## HealthBench Evaluations
