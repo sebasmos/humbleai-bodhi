@@ -2,10 +2,8 @@ import argparse
 import json
 import subprocess
 from datetime import datetime
-import torch
 
 import pandas as pd
-import traceback
 
 from . import common
 from .browsecomp_eval import BrowseCompEval
@@ -26,6 +24,7 @@ from .sampler.claude_sampler import ClaudeCompletionSampler, CLAUDE_SYSTEM_MESSA
 from .sampler.o_chat_completion_sampler import OChatCompletionSampler
 from .sampler.responses_sampler import ResponsesSampler
 from .simpleqa_eval import SimpleQAEval
+
 from .sampler.huggingface_sampler import HuggingFaceSampler
 
 def main():
@@ -54,8 +53,8 @@ def main():
     parser.add_argument(
         "--n-threads",
         type=int,
-        default=5,
-        help="Number of threads to run. Only supported for HealthBench and HealthBenchMeta. Default is 5 to avoid API rate limits.",
+        default=2,
+        help="Number of threads to run. Only supported for HealthBench and HealthBenchMeta.",
     )
     parser.add_argument("--debug", action="store_true", help="Run in debug mode")
     parser.add_argument(
@@ -64,205 +63,227 @@ def main():
 
     args = parser.parse_args()
 
-    models = {
-        # Local HuggingFace models
-        # "gpt-oss-20b": HuggingFaceSampler(
-        #     model_choice="openai/gpt-oss-20b",
-        #     #system_message="You are a helpful assistant.",
-        #     temperature=0.7,
-        #     max_tokens=1024,
-        # ),
-        "gpt-neo-1.3b": HuggingFaceSampler(
-            model_choice="EleutherAI/gpt-neo-1.3B",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            temperature=0.7,
-            max_tokens=1024,
-        ),
-        # Reasoning Models
-        "o3": ResponsesSampler(
-            model="o3-2025-04-16",
-            reasoning_model=True,
-        ),
-        "o3-temp-1": ResponsesSampler(
-            model="o3-2025-04-16",
-            reasoning_model=True,
-            temperature=1.0,
-        ),
-        "o3_high": ResponsesSampler(
-            model="o3-2025-04-16",
-            reasoning_model=True,
-            reasoning_effort="high",
-        ),
-        "o3_low": ResponsesSampler(
-            model="o3-2025-04-16",
-            reasoning_model=True,
-            reasoning_effort="low",
-        ),
-        # Default == Medium
-        "o4-mini": ResponsesSampler(
-            model="o4-mini-2025-04-16",
-            reasoning_model=True,
-        ),
-        "o4-mini_high": ResponsesSampler(
-            model="o4-mini-2025-04-16",
-            reasoning_model=True,
-            reasoning_effort="high",
-        ),
-        "o4-mini_low": ResponsesSampler(
-            model="o4-mini-2025-04-16",
-            reasoning_model=True,
-            reasoning_effort="low",
-        ),
-        "o1-pro": ResponsesSampler(
-            model="o1-pro",
-            reasoning_model=True,
-        ),
-        "o1": OChatCompletionSampler(
-            model="o1",
-        ),
-        "o1_high": OChatCompletionSampler(
-            model="o1",
-            reasoning_effort="high",
-        ),
-        "o1_low": OChatCompletionSampler(
-            model="o1",
-            reasoning_effort="low",
-        ),
-        "o1-preview": OChatCompletionSampler(
-            model="o1-preview",
-        ),
-        "o1-mini": OChatCompletionSampler(
-            model="o1-mini",
-        ),
-        # Default == Medium
-        "o3-mini": OChatCompletionSampler(
-            model="o3-mini",
-        ),
-        "o3-mini_high": OChatCompletionSampler(
-            model="o3-mini",
-            reasoning_effort="high",
-        ),
-        "o3-mini_low": OChatCompletionSampler(
-            model="o3-mini",
-            reasoning_effort="low",
-        ),
-        # GPT-4.1 models
-        "gpt-4.1": ChatCompletionSampler(
-            model="gpt-4.1-2025-04-14",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        ),
-        "gpt-4.1-temp-1": ChatCompletionSampler(
-            model="gpt-4.1-2025-04-14",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            temperature=1.0,
-        ),
-        "gpt-4.1-mini": ChatCompletionSampler(
-            model="gpt-4.1-mini-2025-04-14",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        ),
-        "gpt-4.1-nano": ChatCompletionSampler(
-            model="gpt-4.1-nano-2025-04-14",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        ),
-        # GPT-4o models
-        "gpt-4o": ChatCompletionSampler(
-            model="gpt-4o",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        ),
-        "gpt-4o-2024-11-20": ChatCompletionSampler(
-            model="gpt-4o-2024-11-20",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        ),
-        "gpt-4o-2024-08-06": ChatCompletionSampler(
-            model="gpt-4o-2024-08-06",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        ),
-        "gpt-4o-2024-08-06-temp-1": ChatCompletionSampler(
-            model="gpt-4o-2024-08-06",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-            temperature=1.0,
-        ),
-        "gpt-4o-2024-05-13": ChatCompletionSampler(
-            model="gpt-4o-2024-05-13",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        ),
-        "gpt-4o-mini": ChatCompletionSampler(
-            model="gpt-4o-mini-2024-07-18",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        ),
-        # GPT-4.5 model
-        "gpt-4.5-preview": ChatCompletionSampler(
-            model="gpt-4.5-preview-2025-02-27",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            max_tokens=2048,
-        ),
-        # GPT-4-turbo model
-        "gpt-4-turbo-2024-04-09": ChatCompletionSampler(
-            model="gpt-4-turbo-2024-04-09",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-        ),
-        # GPT-4 model
-        "gpt-4-0613": ChatCompletionSampler(
-            model="gpt-4-0613",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-        ),
-        # GPT-3.5 Turbo model
-        "gpt-3.5-turbo-0125": ChatCompletionSampler(
-            model="gpt-3.5-turbo-0125",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-        ),
-        "gpt-3.5-turbo-0125-temp-1": ChatCompletionSampler(
-            model="gpt-3.5-turbo-0125",
-            system_message=OPENAI_SYSTEM_MESSAGE_API,
-            temperature=1.0,
-        ),
-        # Chatgpt models:
-        "chatgpt-4o-latest": ChatCompletionSampler(
-            model="chatgpt-4o-latest",
-            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
-            max_tokens=2048,
-        ),
-        "gpt-4-turbo-2024-04-09_chatgpt": ChatCompletionSampler(
-            model="gpt-4-turbo-2024-04-09",
-            system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
-        ),
-        # Claude models:
-        "claude-3-opus-20240229_empty": ClaudeCompletionSampler(
-            model="claude-3-opus-20240229",
-            system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
-        ),
-        "claude-3-7-sonnet-20250219": ClaudeCompletionSampler(
-            model="claude-3-7-sonnet-20250219",
-            system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
-        ),
-        "claude-3-haiku-20240307": ClaudeCompletionSampler(
-            model="claude-3-haiku-20240307",
-        ),
-    }
+    def get_model_factory(model_name: str):
+        """Factory function to lazily initialize models only when needed."""
+        model_factories = {
+            # Local HuggingFace models
+            "gpt-neo-1.3b": lambda: HuggingFaceSampler(
+                model_choice="EleutherAI/gpt-neo-1.3B",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
+            ),
+            "gpt-oss-20b": lambda: HuggingFaceSampler(
+                model_choice="openai/gpt-oss-20b",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
+                # Model is already quantized with Mxfp4, no additional quantization needed
+            ),
+            # Reasoning Models
+            "o3": lambda: ResponsesSampler(
+                model="o3-2025-04-16",
+                reasoning_model=True,
+            ),
+            "o3-temp-1": lambda: ResponsesSampler(
+                model="o3-2025-04-16",
+                reasoning_model=True,
+                temperature=1.0,
+            ),
+            "o3_high": lambda: ResponsesSampler(
+                model="o3-2025-04-16",
+                reasoning_model=True,
+                reasoning_effort="high",
+            ),
+            "o3_low": lambda: ResponsesSampler(
+                model="o3-2025-04-16",
+                reasoning_model=True,
+                reasoning_effort="low",
+            ),
+            # Default == Medium
+            "o4-mini": lambda: ResponsesSampler(
+                model="o4-mini-2025-04-16",
+                reasoning_model=True,
+            ),
+            "o4-mini_high": lambda: ResponsesSampler(
+                model="o4-mini-2025-04-16",
+                reasoning_model=True,
+                reasoning_effort="high",
+            ),
+            "o4-mini_low": lambda: ResponsesSampler(
+                model="o4-mini-2025-04-16",
+                reasoning_model=True,
+                reasoning_effort="low",
+            ),
+            "o1-pro": lambda: ResponsesSampler(
+                model="o1-pro",
+                reasoning_model=True,
+            ),
+            "o1": lambda: OChatCompletionSampler(
+                model="o1",
+            ),
+            "o1_high": lambda: OChatCompletionSampler(
+                model="o1",
+                reasoning_effort="high",
+            ),
+            "o1_low": lambda: OChatCompletionSampler(
+                model="o1",
+                reasoning_effort="low",
+            ),
+            "o1-preview": lambda: OChatCompletionSampler(
+                model="o1-preview",
+            ),
+            "o1-mini": lambda: OChatCompletionSampler(
+                model="o1-mini",
+            ),
+            # Default == Medium
+            "o3-mini": lambda: OChatCompletionSampler(
+                model="o3-mini",
+            ),
+            "o3-mini_high": lambda: OChatCompletionSampler(
+                model="o3-mini",
+                reasoning_effort="high",
+            ),
+            "o3-mini_low": lambda: OChatCompletionSampler(
+                model="o3-mini",
+                reasoning_effort="low",
+            ),
+            # GPT-4.1 models
+            "gpt-4.1": lambda: ChatCompletionSampler(
+                model="gpt-4.1-2025-04-14",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+            ),
+            "gpt-4.1-temp-1": lambda: ChatCompletionSampler(
+                model="gpt-4.1-2025-04-14",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+                temperature=1.0,
+            ),
+            "gpt-4.1-mini": lambda: ChatCompletionSampler(
+                model="gpt-4.1-mini-2025-04-14",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+            ),
+            "gpt-4.1-nano": lambda: ChatCompletionSampler(
+                model="gpt-4.1-nano-2025-04-14",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+            ),
+            # GPT-4o models
+            "gpt-4o": lambda: ChatCompletionSampler(
+                model="gpt-4o",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+            ),
+            "gpt-4o-2024-11-20": lambda: ChatCompletionSampler(
+                model="gpt-4o-2024-11-20",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+            ),
+            "gpt-4o-2024-08-06": lambda: ChatCompletionSampler(
+                model="gpt-4o-2024-08-06",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+            ),
+            "gpt-4o-2024-08-06-temp-1": lambda: ChatCompletionSampler(
+                model="gpt-4o-2024-08-06",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+                temperature=1.0,
+            ),
+            "gpt-4o-2024-05-13": lambda: ChatCompletionSampler(
+                model="gpt-4o-2024-05-13",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+            ),
+            "gpt-4o-mini": lambda: ChatCompletionSampler(
+                model="gpt-4o-mini-2024-07-18",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+            ),
+            # GPT-4.5 model
+            "gpt-4.5-preview": lambda: ChatCompletionSampler(
+                model="gpt-4.5-preview-2025-02-27",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                max_tokens=2048,
+            ),
+            # GPT-4-turbo model
+            "gpt-4-turbo-2024-04-09": lambda: ChatCompletionSampler(
+                model="gpt-4-turbo-2024-04-09",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+            ),
+            # GPT-4 model
+            "gpt-4-0613": lambda: ChatCompletionSampler(
+                model="gpt-4-0613",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+            ),
+            # GPT-3.5 Turbo model
+            "gpt-3.5-turbo-0125": lambda: ChatCompletionSampler(
+                model="gpt-3.5-turbo-0125",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+            ),
+            "gpt-3.5-turbo-0125-temp-1": lambda: ChatCompletionSampler(
+                model="gpt-3.5-turbo-0125",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=1.0,
+            ),
+            # Chatgpt models:
+            "chatgpt-4o-latest": lambda: ChatCompletionSampler(
+                model="chatgpt-4o-latest",
+                system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
+                max_tokens=2048,
+            ),
+            "gpt-4-turbo-2024-04-09_chatgpt": lambda: ChatCompletionSampler(
+                model="gpt-4-turbo-2024-04-09",
+                system_message=OPENAI_SYSTEM_MESSAGE_CHATGPT,
+            ),
+            # Claude models:
+            "claude-3-opus-20240229_empty": lambda: ClaudeCompletionSampler(
+                model="claude-3-opus-20240229",
+                system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
+            ),
+            "claude-3-7-sonnet-20250219": lambda: ClaudeCompletionSampler(
+                model="claude-3-7-sonnet-20250219",
+                system_message=CLAUDE_SYSTEM_MESSAGE_LMSYS,
+            ),
+            "claude-3-haiku-20240307": lambda: ClaudeCompletionSampler(
+                model="claude-3-haiku-20240307",
+            ),
+        }
+        return model_factories.get(model_name)
+
+    # Get list of all available models from the factory
+    available_models = [
+        "gpt-neo-1.3b", "gpt-oss-20b", "o3", "o3-temp-1", "o3_high", "o3_low",
+        "o4-mini", "o4-mini_high", "o4-mini_low", "o1-pro", "o1", "o1_high", "o1_low",
+        "o1-preview", "o1-mini", "o3-mini", "o3-mini_high", "o3-mini_low",
+        "gpt-4.1", "gpt-4.1-temp-1", "gpt-4.1-mini", "gpt-4.1-nano",
+        "gpt-4o", "gpt-4o-2024-11-20", "gpt-4o-2024-08-06", "gpt-4o-2024-08-06-temp-1",
+        "gpt-4o-2024-05-13", "gpt-4o-mini", "gpt-4.5-preview",
+        "gpt-4-turbo-2024-04-09", "gpt-4-0613",
+        "gpt-3.5-turbo-0125", "gpt-3.5-turbo-0125-temp-1",
+        "chatgpt-4o-latest", "gpt-4-turbo-2024-04-09_chatgpt",
+        "claude-3-opus-20240229_empty", "claude-3-7-sonnet-20250219", "claude-3-haiku-20240307"
+    ]
 
     if args.list_models:
         print("Available models:")
-        for model_name in models.keys():
+        for model_name in available_models:
             print(f" - {model_name}")
         return
 
     if args.model:
         models_chosen = args.model.split(",")
         for model_name in models_chosen:
-            if model_name not in models:
+            if model_name not in available_models:
                 print(f"Error: Model '{model_name}' not found.")
                 return
-        models = {model_name: models[model_name] for model_name in models_chosen}
+        # Lazily initialize only the selected models
+        models = {model_name: get_model_factory(model_name)() for model_name in models_chosen}
+    else:
+        # If no model specified, initialize all models (original behavior, but lazy)
+        models = {model_name: get_model_factory(model_name)() for model_name in available_models}
 
     print(f"Running with args {args}")
 
@@ -316,38 +337,38 @@ def main():
                 )
             case "healthbench":
                 return HealthBenchEval(
-                    grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
+                    grader_model=grading_sampler,
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
-                    n_threads=args.n_threads,
+                    n_threads=args.n_threads or 1,
                     subset_name=None,
                 )
             case "healthbench_hard":
                 return HealthBenchEval(
-                    grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
+                    grader_model=grading_sampler,
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
-                    n_threads=args.n_threads,
+                    n_threads=args.n_threads or 1,
                     subset_name="hard",
                 )
             case "healthbench_consensus":
                 return HealthBenchEval(
-                    grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
+                    grader_model=grading_sampler,
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
-                    n_threads=args.n_threads,
+                    n_threads=args.n_threads or 1,
                     subset_name="consensus",
                 )
             case "healthbench_meta":
                 return HealthBenchMetaEval(
-                    grader_model=grading_sampler,  # Must use GPT-4.1 for grading, not GPT-Neo
+                    grader_model=grading_sampler,
                     num_examples=10 if debug_mode else num_examples,
                     n_repeats=args.n_repeats or 1,
-                    n_threads=args.n_threads,
+                    n_threads=args.n_threads or 1,
                 )
             case _:
                 raise Exception(f"Unrecognized eval type: {eval_name}")
-    #import pdb; pdb.set_trace()
+
     if args.eval:
         evals_list = args.eval.split(",")
         evals = {}
@@ -355,7 +376,9 @@ def main():
             try:
                 evals[eval_name] = get_evals(eval_name, args.debug)
             except Exception as e:
-                print(f"Failed to create eval '{eval_name}': {e}")
+                print(f"Error: eval '{eval_name}' not found.")
+                print(f"Exception details: {e}")
+                import traceback
                 traceback.print_exc()
                 return
     else:
@@ -388,7 +411,6 @@ def main():
     date_str = now.strftime("%Y%m%d_%H%M%S")
     for model_name, sampler in models.items():
         for eval_name, eval_obj in evals.items():
-            #import pdb; pdb.set_trace()
             result = eval_obj(sampler)
             # ^^^ how to use a sampler
             file_stem = f"{eval_name}_{model_name}"
@@ -402,6 +424,7 @@ def main():
             metrics = result.metrics | {"score": result.score}
             # Sort metrics by key
             metrics = dict(sorted(metrics.items()))
+            print(metrics)
             result_filename = f"/tmp/{file_stem}{debug_suffix}.json"
             with open(result_filename, "w") as f:
                 f.write(json.dumps(metrics, indent=2))

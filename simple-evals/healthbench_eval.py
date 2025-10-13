@@ -17,13 +17,13 @@ import hashlib
 import json
 import random
 import re
-import threading
-import time
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Literal
-import requests
+import urllib.request
+import tempfile
+import os
 
 import blobfile as bf
 import numpy as np
@@ -39,6 +39,28 @@ from .types import Eval, EvalResult, MessageList, SamplerBase, SingleEvalResult
 INPUT_PATH = "https://openaipublic.blob.core.windows.net/simple-evals/healthbench/2025-05-07-06-14-12_oss_eval.jsonl"
 INPUT_PATH_HARD = "https://openaipublic.blob.core.windows.net/simple-evals/healthbench/hard_2025-05-08-21-00-10.jsonl"
 INPUT_PATH_CONSENSUS = "https://openaipublic.blob.core.windows.net/simple-evals/healthbench/consensus_2025-05-09-20-00-46.jsonl"
+
+
+def _download_file_if_needed(url: str) -> str:
+    """Download file from URL and cache it locally. Returns path to local file."""
+    # Create cache directory
+    cache_dir = Path(tempfile.gettempdir()) / "healthbench_cache"
+    cache_dir.mkdir(exist_ok=True)
+
+    # Use URL hash as filename to avoid collisions
+    filename = hashlib.sha256(url.encode()).hexdigest() + ".jsonl"
+    cache_path = cache_dir / filename
+
+    # Download if not cached
+    if not cache_path.exists():
+        print(f"Downloading HealthBench data from {url}...")
+        with urllib.request.urlopen(url) as response:
+            cache_path.write_bytes(response.read())
+        print(f"Downloaded to {cache_path}")
+    else:
+        print(f"Using cached HealthBench data from {cache_path}")
+
+    return str(cache_path)
 
 
 GRADER_TEMPLATE = """
@@ -168,17 +190,6 @@ def get_usage_dict(response_usage) -> dict[str, int | None]:
             "total_tokens": None,
         }
 
-    # Handle dict-based usage (HuggingFace and similar)
-    if isinstance(response_usage, dict):
-        return {
-            "input_tokens": response_usage.get("prompt_tokens"),
-            "input_cached_tokens": response_usage.get("prompt_tokens_details", {}).get("cached_tokens", 0),
-            "output_tokens": response_usage.get("completion_tokens"),
-            "output_reasoning_tokens": response_usage.get("completion_tokens_details", {}).get("reasoning_tokens", 0),
-            "total_tokens": response_usage.get("total_tokens"),
-        }
-
-    # Handle OpenAI-style objects
     try:
         return {
             "input_tokens": response_usage.input_tokens,
@@ -275,7 +286,6 @@ def _aggregate_get_clipped_mean(
         metadata={"example_level_metadata": metadata},
     )
 
-
 class HealthBenchEval(Eval):
     def __init__(
         self,
@@ -286,7 +296,7 @@ class HealthBenchEval(Eval):
         physician_completions_mode: str | None = None,
         # If True, run the grader on reference completions used by physicians, and physician_completions_mode must be set.
         run_reference_completions: bool = False,
-        n_threads: int = 5,
+        n_threads: int = 120,
         subset_name: Literal["hard", "consensus"] | None = None,
     ):
         if run_reference_completions:
@@ -308,37 +318,18 @@ class HealthBenchEval(Eval):
         else:
             assert False, f"Invalid subset name: {subset_name}"
 
-        # Try to read examples via blobfile first. If that fails (e.g., missing
-        # Azure credentials or container not found), attempt an HTTP GET via
-        # requests as a fallback for public containers. This provides clearer
-        # error messages and can work when the blob is publicly accessible.
-        examples = None
+        # Try to use blobfile first, fall back to direct download if it fails
         try:
             with bf.BlobFile(input_path, "rb") as f:
                 examples = [json.loads(line) for line in f]
         except Exception as e:
-            print(f"Warning: blobfile access failed for {input_path}: {e}")
-            print("Attempting HTTP GET fallback for the input path...")
-            try:
-                resp = requests.get(input_path, stream=True, timeout=30)
-                if resp.status_code != 200:
-                    raise RuntimeError(f"HTTP GET failed: status={resp.status_code} url={input_path}")
-                # iterate lines from the response
-                examples = [json.loads(line) for line in resp.iter_lines(decode_unicode=True) if line]
-            except Exception as e2:
-                # Re-raise a clearer exception to the caller
-                raise RuntimeError(
-                    f"Could not load HealthBench examples from {input_path}. blobfile error: {e}; HTTP fallback error: {e2}.\n"
-                    "If the container is private, please run 'az login' or set AZURE_STORAGE_KEY / AZURE_CLIENT_ID / AZURE_CLIENT_SECRET / AZURE_TENANT_ID as appropriate."
-                )
-        # SEB: When azure credentials show an error use: 
-        # response = requests.get(input_path)
-        # response.raise_for_status() 
-        # examples = [json.loads(line) for line in response.text.strip().split('\n') if line.strip()]
-        print(f"Read {len(examples)} examples from {input_path}")
+            print(f"blobfile failed ({e}), falling back to direct HTTP download...")
+            local_path = _download_file_if_needed(input_path)
+            with open(local_path, "r") as f:
+                examples = [json.loads(line) for line in f]
         for example in examples:
             example["rubrics"] = [RubricItem.from_dict(d) for d in example["rubrics"]]
-        print(r"data loaded")
+
         rng = random.Random(0)
 
         # physician completions mode
@@ -394,29 +385,6 @@ class HealthBenchEval(Eval):
         self.examples = examples * n_repeats
         self.n_threads = n_threads
         self.grader_model = grader_model
-        # Rate limiter for grader API calls to prevent 403 errors
-        self._grader_lock = threading.Lock()
-        self._last_grader_call_time = 0
-        self._min_grader_delay = 0.5  # 500ms between grader calls (max ~2 calls/sec) - conservative to avoid 403
-
-    def _rate_limited_grader_call(self, messages):
-        """Thread-safe rate-limited grader API call to prevent 403 errors."""
-        with self._grader_lock:
-            # Calculate time since last call
-            current_time = time.time()
-            time_since_last_call = current_time - self._last_grader_call_time
-
-            # If we're calling too fast, sleep for the remaining time
-            if time_since_last_call < self._min_grader_delay:
-                time.sleep(self._min_grader_delay - time_since_last_call)
-
-            # Make the API call
-            response = self.grader_model(messages)
-
-            # Update last call time
-            self._last_grader_call_time = time.time()
-
-            return response
 
     def grade_sample(
         self,
@@ -435,23 +403,18 @@ class HealthBenchEval(Eval):
             grader_prompt = GRADER_TEMPLATE.replace(
                 "<<conversation>>", convo_str
             ).replace("<<rubric_item>>", str(rubric_item))
-            
             messages: MessageList = [dict(content=grader_prompt, role="user")]
-
             while True:
-                sampler_response = self._rate_limited_grader_call(messages)
-                
+                sampler_response = self.grader_model(messages)
                 grading_response = sampler_response.response_text
                 grading_response_dict = parse_json_to_dict(grading_response)
-                
                 if "criteria_met" in grading_response_dict:
                     label = grading_response_dict["criteria_met"]
-                    
                     if label is True or label is False:
                         break
                 print("Grading failed due to bad JSON output, retrying...")
             return grading_response_dict
-        
+
         grading_response_list = common.map_with_progress(
             grade_rubric_item,
             rubric_items,
@@ -516,7 +479,7 @@ class HealthBenchEval(Eval):
     def __call__(self, sampler: SamplerBase) -> EvalResult:
         def fn(row: dict):
             prompt_messages = row["prompt"]
-            
+
             if self.physician_completions_mode is not None:
                 response_text = row["completion_to_trial"]
                 response_usage = None
@@ -528,8 +491,6 @@ class HealthBenchEval(Eval):
                 actual_queried_prompt_messages = (
                     sampler_response.actual_queried_message_list
                 )
-                #TODO: "verify evrything below"
-                #import pdb; pdb.set_trace()
                 response_usage = response_dict.get("usage", None)
 
             metrics, readable_explanation_str, rubric_items_with_grades = (

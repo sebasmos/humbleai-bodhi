@@ -45,16 +45,18 @@ class HuggingFaceSampler(SamplerBase):
         *,
         model_choice: str = "EleutherAI/gpt-neo-1.3B",
         system_message: str | None = None,
-        max_tokens: int = 256,
+        max_tokens: int = 1024,
         temperature: float = 0.7,
         top_p: float = 0.95,
         top_k: int = 50,
-        repetition_penalty: float = 1.05,
+        repetition_penalty: float = 1.2,
         device: str = "auto",
         torch_dtype: Optional[torch.dtype] = None,
         trust_remote_code: bool = True,
         use_chat_template: bool = True,
-        truncate_input_tokens: int = 800,
+        truncate_input_tokens: int = 2048,
+        load_in_8bit: bool = False,
+        load_in_4bit: bool = False,
     ) -> None:
         self.model_id = model_choice
         self.system_message = system_message
@@ -68,6 +70,8 @@ class HuggingFaceSampler(SamplerBase):
         self.trust_remote_code = trust_remote_code
         self.use_chat_template = use_chat_template
         self.truncate_input_tokens = truncate_input_tokens
+        self.load_in_8bit = load_in_8bit
+        self.load_in_4bit = load_in_4bit
         self.model = None
         self.tokenizer = None
         self._device_str = "cpu"
@@ -101,46 +105,76 @@ class HuggingFaceSampler(SamplerBase):
         device = self._choose_device()
         torch_dtype = self._infer_dtype(device)
         self._device_str = device
-        print(f"Loading model {self.model_id} on {device} (dtype={torch_dtype}) ...")
+
+        quantization_str = ""
+        if self.load_in_8bit:
+            quantization_str = " (8-bit quantization)"
+        elif self.load_in_4bit:
+            quantization_str = " (4-bit quantization)"
+
+        print(f"Loading model {self.model_id} on {device} (dtype={torch_dtype}){quantization_str} ...")
         tokenizer = AutoTokenizer.from_pretrained(self.model_id, trust_remote_code=self.trust_remote_code)
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
+
         device_map = "auto" if device.startswith("cuda") else None
+
+        # Prepare model loading kwargs
+        model_kwargs = {
+            "trust_remote_code": self.trust_remote_code,
+        }
+
+        if self.load_in_8bit:
+            model_kwargs["load_in_8bit"] = True
+            model_kwargs["device_map"] = "auto"
+        elif self.load_in_4bit:
+            model_kwargs["load_in_4bit"] = True
+            model_kwargs["device_map"] = "auto"
+        else:
+            model_kwargs["torch_dtype"] = torch_dtype
+            model_kwargs["device_map"] = device_map
+
         model = AutoModelForCausalLM.from_pretrained(
             self.model_id,
-            torch_dtype=torch_dtype,
-            device_map=device_map,
-            trust_remote_code=self.trust_remote_code,
+            **model_kwargs
         )
-        if device_map is None:
+
+        if device_map is None and not (self.load_in_8bit or self.load_in_4bit):
             model = model.to(device)
+
         self.model = model
         self.tokenizer = tokenizer
+
         if device.startswith("cuda"):
             print(f"Using GPU: {torch.cuda.get_device_name(0)}")
             gb = torch.cuda.get_device_properties(0).total_memory / 1024 ** 3
             print(f"GPU Memory: {gb:.1f} GB")
+            if self.load_in_8bit or self.load_in_4bit:
+                allocated = torch.cuda.memory_allocated(0) / 1024 ** 3
+                print(f"GPU Memory Allocated: {allocated:.1f} GB")
         print("Model loaded successfully.")
 
-    def _build_instruction_prompt(self, messages: MessageList) -> str:  # NEW: instruction-style fallback prompt
-        system_text = self.system_message or "You are a helpful assistant."  # NEW
-        parts: List[str] = []  # NEW
-        parts.append(  # NEW
-            "System:\n"
-            f"{system_text}\n\n"
-            "Instructions:\n"
-            "- Write a single, self-contained answer for the user.\n"
-            "- Use concise, professional Markdown.\n"
-            "- Do NOT include any dialog tags like 'Human:' or 'Assistant:'.\n"
-            "- Do NOT ask the user follow-up questions.\n"
-        )
-        user_chunks = []  # NEW
-        for msg in messages:  # NEW
-            if msg.get("role", "user") == "user":  # NEW
-                user_chunks.append(str(msg.get("content", "")).strip())  # NEW
-        question = "\n\n".join(user_chunks).strip()  # NEW
-        parts.append(f"Question:\n{question}\n\nAnswer:")  # NEW
-        return "\n".join(parts)  # NEW
+    def _build_instruction_prompt(self, messages: MessageList) -> str:
+        """Build a simple completion-style prompt that works well with base causal LMs."""
+        # Extract just the user messages
+        user_texts = []
+        for msg in messages:
+            if msg.get("role", "user") == "user":
+                content = msg.get("content", "")
+                if isinstance(content, str):
+                    user_texts.append(content.strip())
+                elif isinstance(content, list):
+                    # Handle multimodal content
+                    text_parts = [item.get("text", "") for item in content if isinstance(item, dict) and item.get("type") == "text"]
+                    user_texts.append(" ".join(text_parts).strip())
+
+        user_question = "\n\n".join(user_texts).strip()
+
+        # Simple, direct prompt format that works with base LMs
+        prompt = f"""Question: {user_question}
+
+Answer:"""
+        return prompt
 
     def _to_model_input(self, messages: MessageList) -> Dict[str, torch.Tensor]:
         text: str
@@ -175,12 +209,17 @@ class HuggingFaceSampler(SamplerBase):
                 if self.system_message:
                     effective_messages = [self._pack_message("system", self.system_message)] + effective_messages
                 inputs = self._to_model_input(effective_messages)
-                temp = max(0.0, min(0.7, float(self.temperature)))  # NEW: slightly lower temperature for stability
+                temp = float(self.temperature)
                 do_sample = temp > 0.0
-                top_p = min(self.top_p, 0.9)  # NEW: tighten nucleus sampling
-                top_k = 0 if not do_sample else self.top_k  # NEW: deterministic when temp=0
-                stop_criteria = StoppingCriteriaList([  # NEW: stop if model drifts into dialog markers
-                    StopOnSeqs(self.tokenizer, ["\nHuman:", "\nUser:", "\nAssistant:\nHuman:", "\nAssistant:\nUser:"])
+                top_p = self.top_p
+                top_k = 0 if not do_sample else self.top_k
+                stop_criteria = StoppingCriteriaList([
+                    StopOnSeqs(self.tokenizer, [
+                        "\nQuestion:", "\n\nQuestion:",
+                        "\nHuman:", "\nUser:", "\nAssistant:",
+                        "\n\nHuman:", "\n\nUser:", "\n\nAssistant:",
+                        "\nQ:", "\nA:"
+                    ])
                 ])
                 with torch.no_grad():
                     outputs = self.model.generate(
