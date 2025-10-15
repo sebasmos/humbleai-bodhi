@@ -311,12 +311,19 @@ def main():
 
     print(f"Running with args {args}")
 
-    grading_sampler = ChatCompletionSampler(
-        model="gpt-4.1-2025-04-14",
+    # Using local gpt-oss-20b model instead of expensive API calls
+    grading_sampler = HuggingFaceSampler(
+        model_choice="openai/gpt-oss-20b",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
+        temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,
     )
-    equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
+    equality_checker = HuggingFaceSampler(
+        model_choice="openai/gpt-oss-20b",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        temperature=0.1,  # Very low temperature for deterministic yes/no answers
+        max_tokens=512,   # Shorter max_tokens since it only needs yes/no
+    )
     # ^^^ used for fuzzy matching, just for math
 
     def get_evals(eval_name, debug_mode):
