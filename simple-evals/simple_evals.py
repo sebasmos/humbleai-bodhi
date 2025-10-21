@@ -134,6 +134,42 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
             ),
+            # Qwen and DeepSeek Models - 4-bit quantized (memory efficient)
+            "qwen3-32b-4bit": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2.5-32B-Instruct",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+                load_in_4bit=True,  # ~14-16GB GPU RAM instead of 64GB
+            ),
+            "deepseek-r1-qwen-32b-4bit": lambda: HuggingFaceSampler(
+                model_choice="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+                load_in_4bit=True,  # ~14-16GB GPU RAM instead of 64GB
+            ),
+            "qwen2.5-14b-instruct-4bit": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2.5-14B-Instruct",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+                load_in_4bit=True,  # ~5-7GB GPU RAM instead of 28GB
+            ),
+            "qwen3-30b-a3b-4bit": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen3-30B-A3B",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+                load_in_4bit=True,  # ~13-15GB GPU RAM instead of 60GB
+            ),
+            "qwen2.5-14b-4bit": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2.5-14B",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+                load_in_4bit=True,  # ~5-7GB GPU RAM instead of 28GB
+            ),
             # Reasoning Models
             "o3": lambda: ResponsesSampler(
                 model="o3-2025-04-16",
@@ -311,7 +347,9 @@ def main():
     available_models = [
     "gpt-neo-1.3b", "gpt-oss-20b", "medgemma-4b-it", "medgemma-4b-pt", "medgemma-27b-it",
     "medgemma-27b-text-it", "qwen3-32b", "deepseek-r1-qwen-32b", "qwen2.5-14b-instruct",
-    "qwen3-30b-a3b", "qwen2.5-14b", "o3", "o3-temp-1", "o3_high", "o3_low",
+    "qwen3-30b-a3b", "qwen2.5-14b", "qwen3-32b-4bit", "deepseek-r1-qwen-32b-4bit",
+    "qwen2.5-14b-instruct-4bit", "qwen3-30b-a3b-4bit", "qwen2.5-14b-4bit",
+    "o3", "o3-temp-1", "o3_high", "o3_low",
         "o4-mini", "o4-mini_high", "o4-mini_low", "o1-pro", "o1", "o1_high", "o1_low",
         "o1-preview", "o1-mini", "o3-mini", "o3-mini_high", "o3-mini_low",
         "gpt-4.1", "gpt-4.1-temp-1", "gpt-4.1-mini", "gpt-4.1-nano",
@@ -350,18 +388,22 @@ def main():
     # )
     # equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
 
-    # Using local gpt-oss-20b model instead of expensive API calls
+    # Using local models for grading instead of expensive API calls
+    # IMPORTANT: Graders run on CPU to free GPU memory for the model being evaluated
+    # This prevents OOM errors when loading large models (Qwen 32B, etc.)
     grading_sampler = HuggingFaceSampler(
         model_choice="openai/gpt-oss-20b",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,
+        device="cpu",  # Force CPU to save GPU memory for evaluated model
     )
     equality_checker = HuggingFaceSampler(
         model_choice="openai/gpt-oss-20b",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.1,  # Very low temperature for deterministic yes/no answers
         max_tokens=512,   # Shorter max_tokens since it only needs yes/no
+        device="cpu",  # Force CPU to save GPU memory for evaluated model
     )
     # ^^^ used for fuzzy matching, just for math
 
