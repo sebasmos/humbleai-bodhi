@@ -404,10 +404,11 @@ def main():
     # equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
 
     # Using local models for grading instead of expensive API calls
-    # IMPORTANT: Using pre-quantized GPTQ model for efficient grading
-    # Default: Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4 (~7GB VRAM)
+    # IMPORTANT: Using lightweight AWQ model for efficient grading
+    # Default: Qwen/Qwen2.5-7B-Instruct-AWQ (~4GB VRAM)
+    # This allows both grader and evaluation model to fit on GPU together
     grading_sampler = HuggingFaceSampler(
-        model_choice="Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4",
+        model_choice="Qwen/Qwen2.5-7B-Instruct-AWQ",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,
