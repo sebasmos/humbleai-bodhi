@@ -392,19 +392,22 @@ def main():
     # IMPORTANT: Graders run on CPU to free GPU memory for the model being evaluated
     # This prevents OOM errors when loading large models (Qwen 32B, etc.)
     grading_sampler = HuggingFaceSampler(
-        model_choice="openai/gpt-oss-20b",
+        # model_choice="EleutherAI/gpt-neo-1.3B",
+        model_choice = "qwen2.5-14b-4bit",
+        # model_choice="openai/gpt-oss-20b",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,
-        device="cpu",  # Force CPU to save GPU memory for evaluated model
+        # device="cpu",  # Force CPU to save GPU memory for evaluated model
     )
-    equality_checker = HuggingFaceSampler(
-        model_choice="openai/gpt-oss-20b",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        temperature=0.1,  # Very low temperature for deterministic yes/no answers
-        max_tokens=512,   # Shorter max_tokens since it only needs yes/no
-        device="cpu",  # Force CPU to save GPU memory for evaluated model
-    )
+    # equality_checker = HuggingFaceSampler(
+    #     # model_choice="EleutherAI/gpt-neo-1.3B",
+    #     model_choice="openai/gpt-oss-20b",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     temperature=0.1,  # Very low temperature for deterministic yes/no answers
+    #     max_tokens=512,   # Shorter max_tokens since it only needs yes/no
+    #     device="cpu",  # Force CPU to save GPU memory for evaluated model
+    # )
     # ^^^ used for fuzzy matching, just for math
 
     def get_evals(eval_name, debug_mode):
@@ -415,12 +418,12 @@ def main():
         match eval_name:
             case "mmlu":
                 return MMLUEval(num_examples=1 if debug_mode else num_examples)
-            case "math":
-                return MathEval(
-                    equality_checker=equality_checker,
-                    num_examples=num_examples,
-                    n_repeats=1 if debug_mode else args.n_repeats or 10,
-                )
+            # case "math":
+            #     return MathEval(
+            #         equality_checker=equality_checker,
+            #         num_examples=num_examples,
+            #         n_repeats=1 if debug_mode else args.n_repeats or 10,
+            #     )
             case "gpqa":
                 return GPQAEval(
                     n_repeats=1 if debug_mode else args.n_repeats or 10,

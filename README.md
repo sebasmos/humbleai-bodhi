@@ -110,19 +110,24 @@ python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=healthbench,heal
 
 ## GPU Memory Tier Configurations
 
-The evaluation system uses **CPU-based graders** (~6GB system RAM) to free GPU memory for the model being evaluated.
+The evaluation system uses **OSS 20B graders on GPU** (~40GB GPU RAM) for high-quality grading.
 
-### Tier 1: 8-16GB GPU (e.g., RTX 3060, RTX 4060 Ti)
+### ⚠️ IMPORTANT: Grader Memory Requirements
+- **Grading Model**: OSS 20B (~40GB GPU RAM)
+- **Equality Checker**: OSS 20B (shares same model, ~40GB GPU RAM total)
+- **Available for Evaluation Model**: GPU_Total - 40GB
+
+### Tier 1: 48-64GB GPU (e.g., A6000, A40, L40)
 ```bash
-# Best choice: Qwen 2.5 14B Instruct (4-bit)
+# Best choice: Qwen 2.5 14B Instruct (4-bit) - fits perfectly
 python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct-4bit --eval=mmlu
 
 # Alternative: Base model for completion-style tasks
 python -m simple-evals.simple_evals --model=qwen2.5-14b-4bit --eval=mmlu
 ```
-**Memory usage**: ~5-7GB GPU + ~6GB system RAM for graders
+**Memory usage**: 40GB (graders) + 5-7GB (model) = ~45-47GB total
 
-### Tier 2: 24GB GPU (e.g., RTX 3090, RTX 4090, A5000)
+### Tier 2: 64-80GB GPU (e.g., A100 40GB x2, A100 80GB)
 ```bash
 # Best performance: Qwen 3 32B (4-bit)
 python -m simple-evals.simple_evals --model=qwen3-32b-4bit --eval=mmlu
@@ -133,9 +138,9 @@ python -m simple-evals.simple_evals --model=deepseek-r1-qwen-32b-4bit --eval=mat
 # Fast inference: Qwen 3 30B A3B (4-bit)
 python -m simple-evals.simple_evals --model=qwen3-30b-a3b-4bit --eval=mmlu
 ```
-**Memory usage**: ~13-16GB GPU + ~6GB system RAM for graders
+**Memory usage**: 40GB (graders) + 13-16GB (model) = ~53-56GB total
 
-### Tier 3: 40GB+ GPU (e.g., A100, L4, L40)
+### Tier 3: 80GB+ GPU (e.g., A100 80GB, H100)
 ```bash
 # Full precision: Qwen 3 32B (best accuracy)
 python -m simple-evals.simple_evals --model=qwen3-32b --eval=mmlu
@@ -143,9 +148,9 @@ python -m simple-evals.simple_evals --model=qwen3-32b --eval=mmlu
 # Full precision: DeepSeek R1 (reasoning tasks)
 python -m simple-evals.simple_evals --model=deepseek-r1-qwen-32b --eval=math,gpqa
 ```
-**Memory usage**: ~60-64GB GPU + ~6GB system RAM for graders
+**Memory usage**: 40GB (graders) + 32-36GB (model) = ~72-76GB total
 
-### Tier 4: 80GB+ GPU (e.g., A100 80GB, H100)
+### Tier 4: 100GB+ GPU (e.g., H100 80GB with CPU offload)
 ```bash
 # Run multiple models in batch
 python -m simple-evals.simple_evals --model=qwen3-32b,deepseek-r1-qwen-32b --eval=mmlu,math
@@ -154,9 +159,10 @@ python -m simple-evals.simple_evals --model=qwen3-32b,deepseek-r1-qwen-32b --eva
 ### Memory Optimization Tips
 
 1. **Use 4-bit quantization** for 75% memory reduction with minimal accuracy loss
-2. **Graders run on CPU** - GPT-neo-1.3B uses system RAM, not GPU
+2. **OSS 20B graders on GPU** - Better quality grading, requires ~40GB GPU RAM
 3. **One model at a time** - Models are loaded/unloaded sequentially
 4. **Clear cache** between runs: `torch.cuda.empty_cache()` (automatic in code)
+5. **For GPUs < 48GB**: Change graders to CPU by setting `device="cpu"` in simple_evals.py
 
 ## Output
 
