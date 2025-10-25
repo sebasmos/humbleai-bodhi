@@ -7,7 +7,7 @@
 git clone https://github.com/sebasmos/HumbleAILLMs.git
 
 # Install dependencies
-pip install torch transformers accelerate openai anthropic human-eval bitsandbytes
+pip install torch transformers accelerate openai anthropic human-eval bitsandbytes autoawq auto-gptq
 
 # Optional: Set API keys for cloud models (not needed for local models)
 export OPENAI_API_KEY="your-key-here"
@@ -16,6 +16,29 @@ export ANTHROPIC_API_KEY="your-key-here"
 # Optional: Set HuggingFace token for gated models (MedGemma, etc.)
 export HF_TOKEN="your-hf-token-here"  # Get from https://huggingface.co/settings/tokens
 ```
+
+## Download Recommended Models (Pre-Quantized for Efficiency)
+
+**IMPORTANT**: The grader model is set to `Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4` by default. Download it before running evaluations:
+
+```bash
+# Download grader model (required - ~7GB download)
+huggingface-cli download Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4
+
+# Download evaluation models (choose based on your GPU memory):
+
+# For 6-8GB GPU (e.g., RTX 3060, RTX 4060)
+huggingface-cli download Qwen/Qwen2.5-7B-Instruct-AWQ        # ~4GB VRAM
+
+# For 12-16GB GPU (e.g., RTX 3080, RTX 4070 Ti)
+huggingface-cli download Qwen/Qwen2.5-14B-Instruct-AWQ       # ~7GB VRAM
+huggingface-cli download Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4 # ~7GB VRAM (alternative)
+
+# For 24GB+ GPU (e.g., RTX 4090, L40, A100)
+# Use the models above or download larger models as needed
+```
+
+**Note**: If you don't pre-download, models will download automatically when first used (may appear to "hang" during download).
 
 ## Quick Test
 
@@ -48,20 +71,23 @@ medgemma-27b-text-it   # 27B instruction-tuned, text-only variant
                        # https://huggingface.co/google/medgemma-27b-it
                        # https://huggingface.co/google/medgemma-27b-text-it
 
-# Qwen and DeepSeek Models (NEW - High Performance)
-# Full precision (FP16) variants
+# Qwen Models - Pre-Quantized (RECOMMENDED - loads faster, less VRAM)
+qwen2.5-3b-instruct-awq    # 3B instruct model (~2GB VRAM) ⭐ BEST FOR 6GB GPU
+qwen2.5-7b-instruct-awq    # 7B instruct model (~4GB VRAM) ⭐ BEST FOR 8GB GPU
+qwen2.5-7b-instruct-gptq   # 7B instruct GPTQ (~4GB VRAM) - Alternative to AWQ
+qwen2.5-14b-instruct-awq   # 14B instruct AWQ (~7GB VRAM) ⭐ BEST FOR 12-16GB GPU
+qwen2.5-14b-instruct-gptq  # 14B instruct GPTQ (~7GB VRAM) - Default grader model
+
+# Full precision (FP16) variants - for reference
 qwen2.5-14b-instruct      # MMLU 79.7%, 14.8B params (~28GB VRAM)
 qwen2.5-14b               # Base model (~28GB VRAM)
 qwen3-32b                 # MMLU 83-85%, exceptional performance (~64GB VRAM)
 deepseek-r1-qwen-32b      # Beats o1-mini, reasoning-focused (~64GB VRAM)
 qwen3-30b-a3b             # 3B active params, ArenaHard 91.0 (~60GB VRAM)
 
-# 4-bit quantized variants (RECOMMENDED for GPU memory efficiency)
-qwen2.5-14b-instruct-4bit # MMLU 79.7% (~5-7GB VRAM) ⭐ BEST FOR 8-16GB GPU
-qwen2.5-14b-4bit          # Base model (~5-7GB VRAM)
-qwen3-32b-4bit            # MMLU 83-85% (~14-16GB VRAM) ⭐ BEST FOR 24GB+ GPU
-deepseek-r1-qwen-32b-4bit # Reasoning model (~14-16GB VRAM)
-qwen3-30b-a3b-4bit        # ArenaHard 91.0 (~13-15GB VRAM)
+# Dynamic 4-bit quantization (quantizes on load - needs more RAM initially)
+qwen2.5-14b-instruct-4bit # MMLU 79.7% (requires ~10-12GB to load, then ~7GB)
+qwen2.5-14b-4bit          # Base model (requires ~10-12GB to load, then ~7GB)
 ```
 
 ## Basic Evaluations (Local Models)
@@ -110,59 +136,54 @@ python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=healthbench,heal
 
 ## GPU Memory Tier Configurations
 
-The evaluation system uses **OSS 20B graders on GPU** (~40GB GPU RAM) for high-quality grading.
+The evaluation system uses **Qwen 2.5 14B Instruct GPTQ (~7GB VRAM)** as the default grader for high-quality grading.
 
 ### ⚠️ IMPORTANT: Grader Memory Requirements
-- **Grading Model**: OSS 20B (~40GB GPU RAM)
-- **Equality Checker**: OSS 20B (shares same model, ~40GB GPU RAM total)
-- **Available for Evaluation Model**: GPU_Total - 40GB
+- **Grading Model**: Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4 (~7GB GPU RAM)
+- **Available for Evaluation Model**: GPU_Total - 7GB
 
-### Tier 1: 48-64GB GPU (e.g., A6000, A40, L40)
+### Tier 1: 6-8GB GPU (e.g., RTX 3060, RTX 4060)
 ```bash
-# Best choice: Qwen 2.5 14B Instruct (4-bit) - fits perfectly
-python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct-4bit --eval=mmlu
-
-# Alternative: Base model for completion-style tasks
-python -m simple-evals.simple_evals --model=qwen2.5-14b-4bit --eval=mmlu
+# Not recommended - grader alone uses 7GB. Consider CPU grading or use cloud GPU
 ```
-**Memory usage**: 40GB (graders) + 5-7GB (model) = ~45-47GB total
+**Note**: For 6GB GPUs, you'll need to modify the grader to run on CPU or use a smaller grader model.
 
-### Tier 2: 64-80GB GPU (e.g., A100 40GB x2, A100 80GB)
+### Tier 2: 12-16GB GPU (e.g., RTX 3080, RTX 4070 Ti, L40s)
 ```bash
-# Best performance: Qwen 3 32B (4-bit)
-python -m simple-evals.simple_evals --model=qwen3-32b-4bit --eval=mmlu
+# Best choice: Qwen 2.5 7B Instruct AWQ
+python -m simple-evals.simple_evals --model=qwen2.5-7b-instruct-awq --eval=healthbench_hard --examples=10
 
-# Reasoning specialist: DeepSeek R1 (4-bit)
-python -m simple-evals.simple_evals --model=deepseek-r1-qwen-32b-4bit --eval=math,gpqa
-
-# Fast inference: Qwen 3 30B A3B (4-bit)
-python -m simple-evals.simple_evals --model=qwen3-30b-a3b-4bit --eval=mmlu
+# Alternative: Qwen 2.5 3B (for even tighter memory)
+python -m simple-evals.simple_evals --model=qwen2.5-3b-instruct-awq --eval=healthbench_hard --examples=10
 ```
-**Memory usage**: 40GB (graders) + 13-16GB (model) = ~53-56GB total
+**Memory usage**: 7GB (grader) + 4GB (model) = ~11GB total
 
-### Tier 3: 80GB+ GPU (e.g., A100 80GB, H100)
+### Tier 3: 24GB+ GPU (e.g., RTX 4090, A10, A100 24GB)
 ```bash
-# Full precision: Qwen 3 32B (best accuracy)
-python -m simple-evals.simple_evals --model=qwen3-32b --eval=mmlu
+# Best choice: Qwen 2.5 14B Instruct AWQ
+python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct-awq --eval=healthbench_hard --examples=10
 
-# Full precision: DeepSeek R1 (reasoning tasks)
-python -m simple-evals.simple_evals --model=deepseek-r1-qwen-32b --eval=math,gpqa
+# Alternative: GPTQ version
+python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct-gptq --eval=healthbench_hard --examples=10
 ```
-**Memory usage**: 40GB (graders) + 32-36GB (model) = ~72-76GB total
+**Memory usage**: 7GB (grader) + 7GB (model) = ~14GB total
 
-### Tier 4: 100GB+ GPU (e.g., H100 80GB with CPU offload)
+### Tier 4: 40GB+ GPU (e.g., A100 40GB, L40, A6000)
 ```bash
-# Run multiple models in batch
-python -m simple-evals.simple_evals --model=qwen3-32b,deepseek-r1-qwen-32b --eval=mmlu,math
+# Best quality: Full precision 14B models
+python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct --eval=healthbench_hard --examples=10
+
+# Or larger quantized models (if available)
 ```
+**Memory usage**: 7GB (grader) + 28GB (model) = ~35GB total
 
 ### Memory Optimization Tips
 
-1. **Use 4-bit quantization** for 75% memory reduction with minimal accuracy loss
-2. **OSS 20B graders on GPU** - Better quality grading, requires ~40GB GPU RAM
+1. **Use pre-quantized AWQ/GPTQ models** - Loads much faster than dynamic quantization
+2. **Pre-download models** - Use `huggingface-cli download` to avoid hanging during first run
 3. **One model at a time** - Models are loaded/unloaded sequentially
 4. **Clear cache** between runs: `torch.cuda.empty_cache()` (automatic in code)
-5. **For GPUs < 48GB**: Change graders to CPU by setting `device="cpu"` in simple_evals.py
+5. **For GPUs < 16GB**: Modify grader in [simple_evals.py:405](simple-evals/simple_evals.py#L405) to use CPU or smaller model
 
 ## Output
 

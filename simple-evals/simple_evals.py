@@ -134,41 +134,51 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
             ),
-            # Qwen and DeepSeek Models - 4-bit quantized (memory efficient)
-            "qwen3-32b-4bit": lambda: HuggingFaceSampler(
-                model_choice="Qwen/Qwen2.5-32B-Instruct",
+            # Qwen Pre-Quantized Models (GPTQ/AWQ - already quantized, loads faster)
+            "qwen2.5-3b-instruct-awq": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2.5-3B-Instruct-AWQ",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
-                load_in_4bit=True,  # ~14-16GB GPU RAM instead of 64GB
             ),
-            "deepseek-r1-qwen-32b-4bit": lambda: HuggingFaceSampler(
-                model_choice="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+            "qwen2.5-7b-instruct-awq": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2.5-7B-Instruct-AWQ",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
-                load_in_4bit=True,  # ~14-16GB GPU RAM instead of 64GB
             ),
+            "qwen2.5-7b-instruct-gptq": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+            ),
+            "qwen2.5-14b-instruct-awq": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2.5-14B-Instruct-AWQ",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+            ),
+            "qwen2.5-14b-instruct-gptq": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+            ),
+            # Dynamic 4-bit quantization (quantizes on load - needs more RAM initially)
             "qwen2.5-14b-instruct-4bit": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B-Instruct",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
-                load_in_4bit=True,  # ~5-7GB GPU RAM instead of 28GB
-            ),
-            "qwen3-30b-a3b-4bit": lambda: HuggingFaceSampler(
-                model_choice="Qwen/Qwen3-30B-A3B",
-                system_message=OPENAI_SYSTEM_MESSAGE_API,
-                temperature=0.7,
-                max_tokens=2048,
-                load_in_4bit=True,  # ~13-15GB GPU RAM instead of 60GB
+                load_in_4bit=True,  # Requires ~10-12GB GPU RAM to load, then ~7GB
             ),
             "qwen2.5-14b-4bit": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
-                load_in_4bit=True,  # ~5-7GB GPU RAM instead of 28GB
+                load_in_4bit=True,  # Requires ~10-12GB GPU RAM to load, then ~7GB
             ),
             # Reasoning Models
             "o3": lambda: ResponsesSampler(
@@ -389,16 +399,13 @@ def main():
     # equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
 
     # Using local models for grading instead of expensive API calls
-    # IMPORTANT: Graders run on CPU to free GPU memory for the model being evaluated
-    # This prevents OOM errors when loading large models (Qwen 32B, etc.)
+    # IMPORTANT: Using pre-quantized GPTQ model for efficient grading
+    # Default: Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4 (~7GB VRAM)
     grading_sampler = HuggingFaceSampler(
-        # model_choice="EleutherAI/gpt-neo-1.3B",
-        model_choice = "qwen2.5-14b-4bit",
-        # model_choice="openai/gpt-oss-20b",
+        model_choice="Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,
-        # device="cpu",  # Force CPU to save GPU memory for evaluated model
     )
     # equality_checker = HuggingFaceSampler(
     #     # model_choice="EleutherAI/gpt-neo-1.3B",

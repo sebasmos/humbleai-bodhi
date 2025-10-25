@@ -2,7 +2,7 @@ import time
 import os
 from typing import Any, Optional, List, Dict
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from transformers import StoppingCriteria, StoppingCriteriaList  # NEW: stopping criteria for early stop
 from ..types import MessageList, SamplerBase, SamplerResponse
 from dataclasses import dataclass  # NEW: emulate OpenAI usage objects
@@ -58,6 +58,7 @@ class HuggingFaceSampler(SamplerBase):
         truncate_input_tokens: int = 2048,
         load_in_8bit: bool = False,
         load_in_4bit: bool = False,
+        local_files_only: bool = False,
     ) -> None:
         self.model_id = model_choice
         self.system_message = system_message
@@ -73,6 +74,7 @@ class HuggingFaceSampler(SamplerBase):
         self.truncate_input_tokens = truncate_input_tokens
         self.load_in_8bit = load_in_8bit
         self.load_in_4bit = load_in_4bit
+        self.local_files_only = local_files_only
         self.model = None
         self.tokenizer = None
         self._device_str = "cpu"
@@ -120,7 +122,8 @@ class HuggingFaceSampler(SamplerBase):
         tokenizer = AutoTokenizer.from_pretrained(
             self.model_id,
             trust_remote_code=self.trust_remote_code,
-            token=hf_token
+            token=hf_token,
+            local_files_only=self.local_files_only,
         )
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
@@ -131,13 +134,25 @@ class HuggingFaceSampler(SamplerBase):
         model_kwargs = {
             "trust_remote_code": self.trust_remote_code,
             "token": hf_token,
+            "local_files_only": self.local_files_only,
         }
 
         if self.load_in_8bit:
-            model_kwargs["load_in_8bit"] = True
+            # Use BitsAndBytesConfig for 8-bit quantization
+            quantization_config = BitsAndBytesConfig(
+                load_in_8bit=True,
+            )
+            model_kwargs["quantization_config"] = quantization_config
             model_kwargs["device_map"] = "auto"
         elif self.load_in_4bit:
-            model_kwargs["load_in_4bit"] = True
+            # Use BitsAndBytesConfig for 4-bit quantization
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch_dtype,
+                bnb_4bit_use_double_quant=True,  # Double quantization for better compression
+                bnb_4bit_quant_type="nf4",  # NormalFloat4 quantization
+            )
+            model_kwargs["quantization_config"] = quantization_config
             model_kwargs["device_map"] = "auto"
         else:
             model_kwargs["torch_dtype"] = torch_dtype
