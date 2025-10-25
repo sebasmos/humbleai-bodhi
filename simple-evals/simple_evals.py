@@ -405,10 +405,11 @@ def main():
 
     # Using local models for grading instead of expensive API calls
     # IMPORTANT: Using lightweight AWQ model for efficient grading
-    # Default: Qwen/Qwen2.5-7B-Instruct-AWQ (~4GB VRAM)
+    # Default: Qwen/Qwen2.5-3B-Instruct-AWQ (~2GB VRAM)
     # This allows both grader and evaluation model to fit on GPU together
+    # For better grading quality on larger GPUs, change to Qwen/Qwen2.5-7B-Instruct-AWQ
     grading_sampler = HuggingFaceSampler(
-        model_choice="Qwen/Qwen2.5-7B-Instruct-AWQ",
+        model_choice="Qwen/Qwen2.5-3B-Instruct-AWQ",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,

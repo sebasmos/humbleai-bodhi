@@ -128,7 +128,15 @@ class HuggingFaceSampler(SamplerBase):
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
 
-        device_map = "auto" if device.startswith("cuda") else None
+        # Check if this is a pre-quantized model (AWQ/GPTQ)
+        is_awq = "awq" in self.model_id.lower()
+        is_gptq = "gptq" in self.model_id.lower()
+
+        # AWQ/GPTQ models need GPU-only device map (no CPU offloading)
+        if is_awq or is_gptq:
+            device_map = device if device.startswith("cuda") else "cuda:0"
+        else:
+            device_map = "auto" if device.startswith("cuda") else None
 
         # Prepare model loading kwargs
         model_kwargs = {
@@ -155,6 +163,7 @@ class HuggingFaceSampler(SamplerBase):
             model_kwargs["quantization_config"] = quantization_config
             model_kwargs["device_map"] = "auto"
         else:
+            # For pre-quantized models (AWQ/GPTQ) and normal models
             model_kwargs["torch_dtype"] = torch_dtype
             model_kwargs["device_map"] = device_map
 
