@@ -70,14 +70,11 @@ def main():
 
     args = parser.parse_args()
 
-    def get_model_factory(model_name: str, quantize_arg: str | None = None):
-        """Factory function to lazily initialize models only when needed."""
-        # The command-line argument for quantization overrides any hard-coded setting.
-        quantization = quantize_arg
-
-        model_factories = {
-        
-             "Llama-3.1-405B-Instruct-FP8": lambda: HuggingFaceSampler(
+    # Define model_factories as a nested function to capture quantization
+    def get_model_factories(quantization: str | None = None):
+        """Return dict of model factories with the given quantization setting."""
+        return {
+            "Llama-3.1-405B-Instruct-FP8": lambda: HuggingFaceSampler(
                 model_choice="nvidia/Llama-3.1-405B-Instruct-FP8",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
@@ -91,11 +88,18 @@ def main():
                 max_tokens=1024,
                 quantize=quantization,
             ),
-            "Mistral-Large-Instruct-2407": lambda: HuggingFaceSampler(
+            "mistral-large-instruct": lambda: HuggingFaceSampler(
                 model_choice="mistralai/Mistral-Large-Instruct-2407",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
+            ),
+            "mixtral-8x22b-instruct": lambda: HuggingFaceSampler(
+                model_choice="mistralai/Mixtral-8x22B-Instruct-v0.1",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
                 quantize=quantization,
             ),
             # Local HuggingFace models
@@ -118,6 +122,20 @@ def main():
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
+            ),
+            "llama-3-70b": lambda: HuggingFaceSampler(
+                model_choice="meta-llama/Meta-Llama-3-70B",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+                quantize=quantization,
+            ),
+            "llama-3.3-70b-instruct": lambda: HuggingFaceSampler(
+                model_choice="meta-llama/Llama-3.3-70B-Instruct",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
                 quantize=quantization,
             ),
             "medgemma-4b-it": lambda: HuggingFaceSampler(
@@ -184,6 +202,20 @@ def main():
                 max_tokens=2048,
                 quantize=quantization,
             ),
+            "qwen2-72b-instruct": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2-72B-Instruct",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+                quantize=quantization,
+            ),
+            "qwen2-57b-a14b-instruct": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen2-57B-A14B-Instruct",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+                quantize=quantization,
+            ),
             # Qwen Pre-Quantized Models (GPTQ/AWQ - already quantized, loads faster)
             "qwen2.5-3b-instruct-awq": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-3B-Instruct-AWQ",
@@ -215,6 +247,13 @@ def main():
             ),
             "qwen2.5-14b-instruct-gptq-int4": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=2048,
+                quantize=quantization,
+            ),
+            "qwen3-30b-a3b-instruct-fp8": lambda: HuggingFaceSampler(
+                model_choice="Qwen/Qwen3-30B-A3B-Instruct-2507-FP8",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
@@ -406,30 +445,13 @@ def main():
                 model="claude-3-haiku-20240307",
             ),
         }
-        return model_factories.get(model_name)
 
-    # Get list of all available models from the factory
-    available_models = [
-    "Llama-3.1-405B-Instruct-FP8", "Llama-3.1-405B-FP8","Mistral-Large-Instruct-2407", "gpt-neo-1.3b", "gpt-oss-120b", "gpt-oss-20b", "medgemma-4b-it", "medgemma-4b-pt", "medgemma-27b-it",
-    "medgemma-27b-text-it", "qwen3-32b", "deepseek-r1-qwen-32b", "qwen2.5-14b-instruct",
-    "qwen3-30b-a3b", "qwen2.5-14b",
-    # Pre-quantized models (AWQ/GPTQ)
-    "qwen2.5-3b-instruct-awq", "qwen2.5-7b-instruct-awq", "qwen2.5-7b-instruct-gptq",
-    "qwen2.5-14b-instruct-awq", "qwen2.5-14b-instruct-gpt-int4",
-    # Dynamic quantization models
-    "qwen2.5-14b-instruct-4bit", "qwen2.5-14b-4bit",
-    # Reasoning models
-    "o3", "o3-temp-1", "o3_high", "o3_low",
-        "o4-mini", "o4-mini_high", "o4-mini_low", "o1-pro", "o1", "o1_high", "o1_low",
-        "o1-preview", "o1-mini", "o3-mini", "o3-mini_high", "o3-mini_low",
-        "gpt-4.1", "gpt-4.1-temp-1", "gpt-4.1-mini", "gpt-4.1-nano",
-        "gpt-4o", "gpt-4o-2024-11-20", "gpt-4o-2024-08-06", "gpt-4o-2024-08-06-temp-1",
-        "gpt-4o-2024-05-13", "gpt-4o-mini", "gpt-4.5-preview",
-        "gpt-4-turbo-2024-04-09", "gpt-4-0613",
-        "gpt-3.5-turbo-0125", "gpt-3.5-turbo-0125-temp-1",
-        "chatgpt-4o-latest", "gpt-4-turbo-2024-04-09_chatgpt",
-        "claude-3-opus-20240229_empty", "claude-3-7-sonnet-20250219", "claude-3-haiku-20240307"
-    ]
+    # Get model factories with the quantization argument
+    model_factories = get_model_factories(args.quantize)
+
+    # Auto-generate list of all available models from the factory
+    # This ensures the list stays in sync with model_factories
+    available_models = list(model_factories.keys())
 
     if args.list_models:
         print("Available models:")
@@ -444,10 +466,10 @@ def main():
                 print(f"Error: Model '{model_name}' not found.")
                 return
         # Lazily initialize only the selected models
-        models = {model_name: get_model_factory(model_name, args.quantize)() for model_name in models_chosen}
+        models = {model_name: model_factories[model_name]() for model_name in models_chosen}
     else:
         # If no model specified, initialize all models (original behavior, but lazy)
-        models = {model_name: get_model_factory(model_name, args.quantize)() for model_name in available_models}
+        models = {model_name: model_factories[model_name]() for model_name in available_models}
 
     print(f"Running with args {args}")
 
@@ -459,10 +481,9 @@ def main():
     # equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
 
     # Using local models for grading instead of expensive API calls
-    # IMPORTANT: Using lightweight AWQ model for efficient grading
-    # Default: Qwen/Qwen2.5-3B-Instruct-AWQ (~2GB VRAM)
-    # This allows both grader and evaluation model to fit on GPU together
-    # For better grading quality on larger GPUs, change to Qwen/Qwen2.5-7B-Instruct-AWQ
+    # IMPORTANT: Using AWQ grader to avoid API costs
+    # Default: Qwen/Qwen2.5-14B-Instruct-AWQ (~7GB VRAM)
+    # For smaller GPUs, swap to Qwen/Qwen2.5-3B-Instruct-AWQ before running
     grading_sampler = HuggingFaceSampler(
         #model_choice="openai/gpt-oss-120b",
         model_choice = "Qwen/Qwen2.5-14B-Instruct-AWQ",

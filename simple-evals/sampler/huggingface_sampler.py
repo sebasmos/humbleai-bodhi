@@ -100,7 +100,14 @@ class HuggingFaceSampler(SamplerBase):
     def _infer_dtype(self, device: str) -> torch.dtype:
         if self.torch_dtype is not None:
             return self.torch_dtype
+
+        # Check if this is an FP8 model
+        is_fp8 = "fp8" in self.model_id.lower()
+
         if device.startswith("cuda"):
+            # FP8 models prefer bfloat16 compute dtype for better compatibility
+            if is_fp8 and torch.cuda.is_bf16_supported():
+                return torch.bfloat16
             return torch.float16
         if device == "mps":
             return torch.float32
@@ -130,9 +137,15 @@ class HuggingFaceSampler(SamplerBase):
         if tokenizer.pad_token is None:
             tokenizer.pad_token = tokenizer.eos_token
 
-        # Check if this is a pre-quantized model (AWQ/GPTQ)
+        # Check if this is a pre-quantized model (AWQ/GPTQ/FP8)
         is_awq = "awq" in self.model_id.lower()
         is_gptq = "gptq" in self.model_id.lower()
+        is_fp8 = "fp8" in self.model_id.lower()
+
+        # Warn when trying to quantize pre-quantized models
+        if (is_awq or is_gptq or is_fp8) and self.quantize:
+            print(f"Warning: Model {self.model_id} is already quantized ({('AWQ' if is_awq else 'GPTQ' if is_gptq else 'FP8')}). "
+                  f"Additional quantization may cause dtype mismatches or performance issues.")
 
         # AWQ/GPTQ models need GPU-only device map (no CPU offloading)
         if is_awq or is_gptq:
@@ -156,9 +169,14 @@ class HuggingFaceSampler(SamplerBase):
             model_kwargs["device_map"] = "auto"
         elif self.quantize == "4bit":
             # Use BitsAndBytesConfig for 4-bit quantization
+            # Ensure bfloat16 if available and suitable for better stability
+            compute_dtype = torch_dtype
+            if device.startswith("cuda") and torch.cuda.is_bf16_supported():
+                compute_dtype = torch.bfloat16
+
             quantization_config = BitsAndBytesConfig(
                 load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch_dtype,
+                bnb_4bit_compute_dtype=compute_dtype,
                 bnb_4bit_use_double_quant=True,
                 bnb_4bit_quant_type="nf4",
             )
