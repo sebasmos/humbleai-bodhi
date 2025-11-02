@@ -7,7 +7,7 @@
 git clone https://github.com/sebasmos/HumbleAILLMs.git
 
 # Install dependencies
-pip install torch transformers accelerate openai anthropic human-eval bitsandbytes autoawq auto-gptq
+pip install tabulate optimum torch transformers accelerate openai anthropic human-eval bitsandbytes autoawq auto-gptq
 
 # Optional: Set API keys for cloud models (not needed for local models)
 export OPENAI_API_KEY="your-key-here"
