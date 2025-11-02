@@ -73,7 +73,9 @@ class HuggingFaceSampler(SamplerBase):
         self.use_chat_template = use_chat_template
         self.truncate_input_tokens = truncate_input_tokens
         self.load_in_8bit = load_in_8bit
-        self.quantize = quantize
+        self.quantize = quantize or ("8bit" if load_in_8bit else None)
+        if self.quantize not in (None, "4bit", "8bit"):
+            raise ValueError("quantize must be one of None, '4bit', or '8bit'")
         self.local_files_only = local_files_only
         self.model = None
         self.tokenizer = None
@@ -180,7 +182,7 @@ class HuggingFaceSampler(SamplerBase):
             print(f"Using GPU: {torch.cuda.get_device_name(0)}")
             gb = torch.cuda.get_device_properties(0).total_memory / 1024 ** 3
             print(f"GPU Memory: {gb:.1f} GB")
-            if self.load_in_8bit or self.load_in_4bit:
+            if self.quantize in ("8bit", "4bit"):
                 allocated = torch.cuda.memory_allocated(0) / 1024 ** 3
                 print(f"GPU Memory Allocated: {allocated:.1f} GB")
         print("Model loaded successfully.")
