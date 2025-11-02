@@ -60,11 +60,21 @@ def main():
     parser.add_argument(
         "--examples", type=int, help="Number of examples to use (overrides default)"
     )
+    parser.add_argument(
+        "--quantize",
+        type=str,
+        default=None,
+        choices=["4bit", "8bit"],
+        help="Quantization to apply to the model (4bit or 8bit).",
+    )
 
     args = parser.parse_args()
 
-    def get_model_factory(model_name: str):
+    def get_model_factory(model_name: str, quantize_arg: str | None = None):
         """Factory function to lazily initialize models only when needed."""
+        # The command-line argument for quantization overrides any hard-coded setting.
+        quantization = quantize_arg
+
         model_factories = {
         
              "Llama-3.1-405B-Instruct-FP8": lambda: HuggingFaceSampler(
@@ -72,18 +82,21 @@ def main():
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             "Llama-3.1-405B-FP8": lambda: HuggingFaceSampler(
                 model_choice="meta-llama/Llama-3.1-405B-FP8",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             "Mistral-Large-Instruct-2407": lambda: HuggingFaceSampler(
                 model_choice="mistralai/Mistral-Large-Instruct-2407",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             # Local HuggingFace models
             "gpt-neo-1.3b": lambda: HuggingFaceSampler(
@@ -91,42 +104,49 @@ def main():
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             "gpt-oss-120b": lambda: HuggingFaceSampler(
                 model_choice="openai/gpt-oss-120b",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             "gpt-oss-20b": lambda: HuggingFaceSampler(
                 model_choice="openai/gpt-oss-20b",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             "medgemma-4b-it": lambda: HuggingFaceSampler(
                 model_choice="google/medgemma-4b-it",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             "medgemma-4b-pt": lambda: HuggingFaceSampler(
                 model_choice="google/medgemma-4b-pt",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             "medgemma-27b-it": lambda: HuggingFaceSampler(
                 model_choice="google/medgemma-27b-it",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             "medgemma-27b-text-it": lambda: HuggingFaceSampler(
                 model_choice="google/medgemma-27b-text-it",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
+                quantize=quantization,
             ),
             # Qwen and DeepSeek Models
             "qwen3-32b": lambda: HuggingFaceSampler(
@@ -134,30 +154,35 @@ def main():
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             "deepseek-r1-qwen-32b": lambda: HuggingFaceSampler(
                 model_choice="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             "qwen2.5-14b-instruct": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B-Instruct",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             "qwen3-30b-a3b": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen3-30B-A3B",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             "qwen2.5-14b": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             # Qwen Pre-Quantized Models (GPTQ/AWQ - already quantized, loads faster)
             "qwen2.5-3b-instruct-awq": lambda: HuggingFaceSampler(
@@ -165,30 +190,35 @@ def main():
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             "qwen2.5-7b-instruct-awq": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-7B-Instruct-AWQ",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             "qwen2.5-7b-instruct-gptq": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             "qwen2.5-14b-instruct-awq": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B-Instruct-AWQ",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             "qwen2.5-14b-instruct-gptq": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
+                quantize=quantization,
             ),
             # Dynamic 4-bit quantization (quantizes on load - needs more RAM initially)
             "qwen2.5-14b-instruct-4bit": lambda: HuggingFaceSampler(
@@ -196,14 +226,14 @@ def main():
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
-                load_in_4bit=True,  # Requires ~10-12GB GPU RAM to load, then ~7GB
+                quantize=quantization or "4bit",  # Requires ~10-12GB GPU RAM to load, then ~7GB
             ),
             "qwen2.5-14b-4bit": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=2048,
-                load_in_4bit=True,  # Requires ~10-12GB GPU RAM to load, then ~7GB
+                quantize=quantization or "4bit",  # Requires ~10-12GB GPU RAM to load, then ~7GB
             ),
             # Reasoning Models
             "o3": lambda: ResponsesSampler(
@@ -414,10 +444,10 @@ def main():
                 print(f"Error: Model '{model_name}' not found.")
                 return
         # Lazily initialize only the selected models
-        models = {model_name: get_model_factory(model_name)() for model_name in models_chosen}
+        models = {model_name: get_model_factory(model_name, args.quantize)() for model_name in models_chosen}
     else:
         # If no model specified, initialize all models (original behavior, but lazy)
-        models = {model_name: get_model_factory(model_name)() for model_name in available_models}
+        models = {model_name: get_model_factory(model_name, args.quantize)() for model_name in available_models}
 
     print(f"Running with args {args}")
 

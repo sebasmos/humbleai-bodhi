@@ -22,6 +22,9 @@ export HF_TOKEN="your-hf-token-here"  # Get from https://huggingface.co/settings
 **IMPORTANT**: The grader model is set to `Qwen/Qwen2.5-7B-Instruct-AWQ` by default (~4GB VRAM). Download it before running evaluations:
 
 ```bash
+
+huggingface-cli download openai/gpt-oss-120b
+
 # Download grader model (required - ~4GB download)
 huggingface-cli download Qwen/Qwen2.5-7B-Instruct-AWQ
 

@@ -57,7 +57,7 @@ class HuggingFaceSampler(SamplerBase):
         use_chat_template: bool = True,
         truncate_input_tokens: int = 2048,
         load_in_8bit: bool = False,
-        load_in_4bit: bool = False,
+        quantize: Optional[str] = None,
         local_files_only: bool = False,
     ) -> None:
         self.model_id = model_choice
@@ -73,7 +73,7 @@ class HuggingFaceSampler(SamplerBase):
         self.use_chat_template = use_chat_template
         self.truncate_input_tokens = truncate_input_tokens
         self.load_in_8bit = load_in_8bit
-        self.load_in_4bit = load_in_4bit
+        self.quantize = quantize
         self.local_files_only = local_files_only
         self.model = None
         self.tokenizer = None
@@ -113,9 +113,9 @@ class HuggingFaceSampler(SamplerBase):
         hf_token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_TOKEN")
 
         quantization_str = ""
-        if self.load_in_8bit:
+        if self.quantize == "8bit":
             quantization_str = " (8-bit quantization)"
-        elif self.load_in_4bit:
+        elif self.quantize == "4bit":
             quantization_str = " (4-bit quantization)"
 
         print(f"Loading model {self.model_id} on {device} (dtype={torch_dtype}){quantization_str} ...")
@@ -145,20 +145,18 @@ class HuggingFaceSampler(SamplerBase):
             "local_files_only": self.local_files_only,
         }
 
-        if self.load_in_8bit:
+        if self.quantize == "8bit":
             # Use BitsAndBytesConfig for 8-bit quantization
             quantization_config = BitsAndBytesConfig(
                 load_in_8bit=True,
             )
             model_kwargs["quantization_config"] = quantization_config
             model_kwargs["device_map"] = "auto"
-        elif self.load_in_4bit:
+        elif self.quantize == "4bit":
             # Use BitsAndBytesConfig for 4-bit quantization
             quantization_config = BitsAndBytesConfig(
                 load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch_dtype,
-                bnb_4bit_use_double_quant=True,  # Double quantization for better compression
-                bnb_4bit_quant_type="nf4",  # NormalFloat4 quantization
+                bnb_4bit_compute_dtype=torch.bfloat16,
             )
             model_kwargs["quantization_config"] = quantization_config
             model_kwargs["device_map"] = "auto"
@@ -172,7 +170,7 @@ class HuggingFaceSampler(SamplerBase):
             **model_kwargs
         )
 
-        if device_map is None and not (self.load_in_8bit or self.load_in_4bit):
+        if device_map is None and not (self.quantize):
             model = model.to(device)
 
         self.model = model
