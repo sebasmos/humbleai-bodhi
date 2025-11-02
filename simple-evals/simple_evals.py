@@ -434,7 +434,7 @@ def main():
     # This allows both grader and evaluation model to fit on GPU together
     # For better grading quality on larger GPUs, change to Qwen/Qwen2.5-7B-Instruct-AWQ
     grading_sampler = HuggingFaceSampler(
-        model_choice="Qwen/gpt-oss-120b",
+        model_choice="openai/gpt-oss-120b",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,
