@@ -1,3 +1,5 @@
+# HumbleAILLMs - Multi-GPU Evaluation System
+
 # Simple-Evals Setup Guide
 
 ## Installation
@@ -130,65 +132,11 @@ python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct-awq --eval=heal
 - `--model=name1,name2` → Test multiple models
 - `--eval=eval1,eval2` → Run multiple evaluations
 
-## GPU Memory Tier Configurations
-
-The evaluation system uses **Qwen/Qwen2.5-14B-Instruct-AWQ (~7GB VRAM)** as the default grader for higher-quality scoring.
-
-### ⚠️ IMPORTANT: Grader Memory Requirements
-- **Grading Model**: Qwen/Qwen2.5-14B-Instruct-AWQ (~7GB GPU RAM)
-- **Available for Evaluation Model**: GPU_Total - 7GB
-
-### Tier 1: 12-16GB GPU (e.g., RTX 3080, RTX 4070 Ti, L40s)
-```bash
-# Optional: edit simple_evals.py to switch grader to Qwen/Qwen2.5-3B-Instruct-AWQ for headroom
-python -m simple-evals.simple_evals --model=qwen2.5-3b-instruct-awq --eval=healthbench_hard --examples=10
-
-# Alternative for better accuracy
-python -m simple-evals.simple_evals --model=qwen2.5-7b-instruct-gptq --eval=healthbench_hard --examples=10 --quantize 4bit
-```
-**Memory usage**: 7GB (default grader) + 2-4GB (model) = ~9-11GB total — dropping the grader to 3B frees ~5GB.
-
-### Tier 2: 16-24GB GPU (e.g., RTX 3090, RTX 4080)
-```bash
-# Best choice: Qwen 2.5 7B Instruct AWQ
-python -m simple-evals.simple_evals --model=qwen2.5-7b-instruct-awq --eval=healthbench_hard --examples=10
-
-# Alternative: Qwen 2.5 14B AWQ (higher quality)
-python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct-awq --eval=healthbench_hard --examples=10
-```
-**Memory usage**: 7GB (grader) + 4-7GB (model) = ~11-14GB total
-
-### Tier 3: 24-40GB GPU (e.g., RTX 4090, A10, A100 24GB)
-```bash
-# Best choice: Qwen 2.5 14B Instruct AWQ
-python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct-awq --eval=healthbench_hard --examples=10
-
-# Alternative: GPTQ version
-python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct-gptq --eval=healthbench_hard --examples=10
-```
-**Memory usage**: 7GB (grader) + 7GB (model) = ~14GB total
-
-### Tier 4: 40GB+ GPU (e.g., A100 40GB, L40, A6000)
-```bash
-# Best quality: Full precision 14B models
-python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct --eval=healthbench_hard --examples=10
-
-# Advanced: FP8 / 70B models (set --quantize 4bit or use accelerate/TP)
-python -m simple-evals.simple_evals --model=meta-llama/Llama-3.3-70B-Instruct --eval=healthbench_hard --examples=10 --quantize 4bit
-python -m simple-evals.simple_evals --model=Qwen/Qwen2-72B-Instruct --eval=healthbench_hard --examples=10 --quantize 4bit
-```
-**Memory usage**: 7GB (grader) + 28GB (model) = ~35GB total before quantization; FP8/70B runs require ≥96GB or multi-GPU.
-
-### Memory Optimization Tips
-
-1. **Use pre-quantized AWQ/GPTQ models** - Loads much faster than dynamic quantization
-2. **Pre-download models** - Use `huggingface-cli download` to avoid hanging during first run
-3. **One model at a time** - Models are loaded/unloaded sequentially
-4. **Clear cache** between runs: `torch.cuda.empty_cache()` (automatic in code)
-5. **For GPUs < 12GB**: Modify grader in [simple_evals.py:411](simple-evals/simple_evals.py#L411) to use `Qwen/Qwen2.5-3B-Instruct-AWQ` (~2GB) or run on CPU with `device="cpu"`
-
 ## Output
 
 Results saved to `/tmp/` as:
 - HTML reports: `{eval}_{model}_{timestamp}.html`
 - JSON metrics: `{eval}_{model}_{timestamp}.json`
+Complete system for running LLM evaluations on MIT Engaging cluster with automatic multi-GPU support.
+
+---
