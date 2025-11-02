@@ -66,9 +66,34 @@ def main():
     def get_model_factory(model_name: str):
         """Factory function to lazily initialize models only when needed."""
         model_factories = {
+        
+             "Llama-3.1-405B-Instruct-FP8": lambda: HuggingFaceSampler(
+                model_choice="nvidia/Llama-3.1-405B-Instruct-FP8",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
+            ),
+            "Llama-3.1-405B-FP8": lambda: HuggingFaceSampler(
+                model_choice="meta-llama/Llama-3.1-405B-FP8",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
+            ),
+            "Mistral-Large-Instruct-2407": lambda: HuggingFaceSampler(
+                model_choice="mistralai/Mistral-Large-Instruct-2407",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
+            ),
             # Local HuggingFace models
             "gpt-neo-1.3b": lambda: HuggingFaceSampler(
                 model_choice="EleutherAI/gpt-neo-1.3B",
+                system_message=OPENAI_SYSTEM_MESSAGE_API,
+                temperature=0.7,
+                max_tokens=1024,
+            ),
+            "gpt-oss-120b": lambda: HuggingFaceSampler(
+                model_choice="openai/gpt-oss-120b",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
                 max_tokens=1024,
@@ -355,7 +380,7 @@ def main():
 
     # Get list of all available models from the factory
     available_models = [
-    "gpt-neo-1.3b", "gpt-oss-20b", "medgemma-4b-it", "medgemma-4b-pt", "medgemma-27b-it",
+    "Llama-3.1-405B-Instruct-FP8", "Llama-3.1-405B-FP8","Mistral-Large-Instruct-2407", "gpt-neo-1.3b", "gpt-oss-120b", "gpt-oss-20b", "medgemma-4b-it", "medgemma-4b-pt", "medgemma-27b-it",
     "medgemma-27b-text-it", "qwen3-32b", "deepseek-r1-qwen-32b", "qwen2.5-14b-instruct",
     "qwen3-30b-a3b", "qwen2.5-14b",
     # Pre-quantized models (AWQ/GPTQ)
@@ -409,7 +434,7 @@ def main():
     # This allows both grader and evaluation model to fit on GPU together
     # For better grading quality on larger GPUs, change to Qwen/Qwen2.5-7B-Instruct-AWQ
     grading_sampler = HuggingFaceSampler(
-        model_choice="Qwen/Qwen2.5-3B-Instruct-AWQ",
+        model_choice="Qwen/gpt-oss-120b",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,

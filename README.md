@@ -93,27 +93,11 @@ qwen2.5-14b-instruct-4bit # MMLU 79.7% (requires ~10-12GB to load, then ~7GB)
 qwen2.5-14b-4bit          # Base model (requires ~10-12GB to load, then ~7GB)
 ```
 
-## Basic Evaluations (Local Models)
-
-```bash
-# Multiple choice (no grader needed)
-python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=mmlu --examples=1 --debug
-python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=gpqa --examples=1 --debug
-
-# Math and reasoning
-python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=mgsm --examples=5 --debug
-python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=drop --examples=5 --debug
-
-# Medical evaluation with MedGemma (requires HF_TOKEN)
-export HF_TOKEN="hf_your_token_here"
-python -m simple-evals.simple_evals --model=medgemma-4b-it --eval=healthbench --examples=5
-# Or try the larger variant
-python -m simple-evals.simple_evals --model=medgemma-27b-it --eval=healthbench --examples=5
-```
-
 ## HealthBench Evaluations
 
 ```bash
+python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=healthbench_hard --examples=5
+
 # Standard HealthBench
 python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=healthbench --examples=1
 
