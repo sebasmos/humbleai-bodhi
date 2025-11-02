@@ -59,6 +59,8 @@ class HuggingFaceSampler(SamplerBase):
         load_in_8bit: bool = False,
         quantize: Optional[str] = None,
         local_files_only: bool = False,
+        num_gpus: Optional[int] = None,
+        use_accelerate: bool = True,
     ) -> None:
         self.model_id = model_choice
         self.system_message = system_message
@@ -77,6 +79,8 @@ class HuggingFaceSampler(SamplerBase):
         if self.quantize not in (None, "4bit", "8bit"):
             raise ValueError("quantize must be one of None, '4bit', or '8bit'")
         self.local_files_only = local_files_only
+        self.num_gpus = num_gpus
+        self.use_accelerate = use_accelerate
         self.model = None
         self.tokenizer = None
         self._device_str = "cpu"
@@ -147,8 +151,20 @@ class HuggingFaceSampler(SamplerBase):
             print(f"Warning: Model {self.model_id} is already quantized ({('AWQ' if is_awq else 'GPTQ' if is_gptq else 'FP8')}). "
                   f"Additional quantization may cause dtype mismatches or performance issues.")
 
-        # AWQ/GPTQ models need GPU-only device map (no CPU offloading)
-        if is_awq or is_gptq:
+        # Determine number of GPUs to use
+        available_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
+        if self.num_gpus is not None:
+            num_gpus_to_use = min(self.num_gpus, available_gpus)
+        else:
+            num_gpus_to_use = available_gpus
+
+        # Configure device_map for multi-GPU support
+        if num_gpus_to_use > 1 and self.use_accelerate:
+            # Use Accelerate's automatic model parallelism across multiple GPUs
+            device_map = "auto"
+            print(f"Using {num_gpus_to_use} GPUs with automatic model parallelism (device_map='auto')")
+        elif is_awq or is_gptq:
+            # AWQ/GPTQ models need GPU-only device map (no CPU offloading)
             device_map = device if device.startswith("cuda") else "cuda:0"
         else:
             device_map = "auto" if device.startswith("cuda") else None
@@ -199,12 +215,24 @@ class HuggingFaceSampler(SamplerBase):
         self.tokenizer = tokenizer
 
         if device.startswith("cuda"):
-            print(f"Using GPU: {torch.cuda.get_device_name(0)}")
-            gb = torch.cuda.get_device_properties(0).total_memory / 1024 ** 3
-            print(f"GPU Memory: {gb:.1f} GB")
-            if self.quantize in ("8bit", "4bit"):
-                allocated = torch.cuda.memory_allocated(0) / 1024 ** 3
-                print(f"GPU Memory Allocated: {allocated:.1f} GB")
+            if num_gpus_to_use > 1:
+                # Print info for all GPUs being used
+                print(f"Multi-GPU setup with {num_gpus_to_use} GPUs:")
+                for gpu_id in range(num_gpus_to_use):
+                    gpu_name = torch.cuda.get_device_name(gpu_id)
+                    gpu_mem = torch.cuda.get_device_properties(gpu_id).total_memory / 1024 ** 3
+                    print(f"  GPU {gpu_id}: {gpu_name} ({gpu_mem:.1f} GB)")
+                    if self.quantize in ("8bit", "4bit"):
+                        allocated = torch.cuda.memory_allocated(gpu_id) / 1024 ** 3
+                        print(f"    Allocated: {allocated:.1f} GB")
+            else:
+                # Single GPU info
+                print(f"Using GPU: {torch.cuda.get_device_name(0)}")
+                gb = torch.cuda.get_device_properties(0).total_memory / 1024 ** 3
+                print(f"GPU Memory: {gb:.1f} GB")
+                if self.quantize in ("8bit", "4bit"):
+                    allocated = torch.cuda.memory_allocated(0) / 1024 ** 3
+                    print(f"GPU Memory Allocated: {allocated:.1f} GB")
         print("Model loaded successfully.")
 
     def _build_instruction_prompt(self, messages: MessageList) -> str:

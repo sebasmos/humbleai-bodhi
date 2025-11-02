@@ -67,12 +67,18 @@ def main():
         choices=["4bit", "8bit"],
         help="Quantization to apply to the model (4bit or 8bit).",
     )
+    parser.add_argument(
+        "--num-gpus",
+        type=int,
+        default=None,
+        help="Number of GPUs to use for model parallelism. Default: use all available GPUs.",
+    )
 
     args = parser.parse_args()
 
-    # Define model_factories as a nested function to capture quantization
-    def get_model_factories(quantization: str | None = None):
-        """Return dict of model factories with the given quantization setting."""
+    # Define model_factories as a nested function to capture quantization and num_gpus
+    def get_model_factories(quantization: str | None = None, num_gpus: int | None = None):
+        """Return dict of model factories with the given quantization and num_gpus settings."""
         return {
             "Llama-3.1-405B-Instruct-FP8": lambda: HuggingFaceSampler(
                 model_choice="nvidia/Llama-3.1-405B-Instruct-FP8",
@@ -80,6 +86,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "Llama-3.1-405B-FP8": lambda: HuggingFaceSampler(
                 model_choice="meta-llama/Llama-3.1-405B-FP8",
@@ -87,6 +94,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "mistral-large-instruct": lambda: HuggingFaceSampler(
                 model_choice="mistralai/Mistral-Large-Instruct-2407",
@@ -94,6 +102,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "mixtral-8x22b-instruct": lambda: HuggingFaceSampler(
                 model_choice="mistralai/Mixtral-8x22B-Instruct-v0.1",
@@ -101,6 +110,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             # Local HuggingFace models
             "gpt-neo-1.3b": lambda: HuggingFaceSampler(
@@ -109,6 +119,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "gpt-oss-120b": lambda: HuggingFaceSampler(
                 model_choice="openai/gpt-oss-120b",
@@ -116,6 +127,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "gpt-oss-20b": lambda: HuggingFaceSampler(
                 model_choice="openai/gpt-oss-20b",
@@ -123,6 +135,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "llama-3-70b": lambda: HuggingFaceSampler(
                 model_choice="meta-llama/Meta-Llama-3-70B",
@@ -130,6 +143,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "llama-3.3-70b-instruct": lambda: HuggingFaceSampler(
                 model_choice="meta-llama/Llama-3.3-70B-Instruct",
@@ -137,6 +151,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "medgemma-4b-it": lambda: HuggingFaceSampler(
                 model_choice="google/medgemma-4b-it",
@@ -144,6 +159,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "medgemma-4b-pt": lambda: HuggingFaceSampler(
                 model_choice="google/medgemma-4b-pt",
@@ -151,6 +167,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "medgemma-27b-it": lambda: HuggingFaceSampler(
                 model_choice="google/medgemma-27b-it",
@@ -158,6 +175,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "medgemma-27b-text-it": lambda: HuggingFaceSampler(
                 model_choice="google/medgemma-27b-text-it",
@@ -165,6 +183,7 @@ def main():
                 temperature=0.7,
                 max_tokens=1024,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             # Qwen and DeepSeek Models
             "qwen3-32b": lambda: HuggingFaceSampler(
@@ -173,6 +192,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "deepseek-r1-qwen-32b": lambda: HuggingFaceSampler(
                 model_choice="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
@@ -180,6 +200,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen2.5-14b-instruct": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B-Instruct",
@@ -187,6 +208,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen3-30b-a3b": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen3-30B-A3B",
@@ -194,6 +216,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen2.5-14b": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B",
@@ -201,6 +224,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen2-72b-instruct": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2-72B-Instruct",
@@ -208,6 +232,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen2-57b-a14b-instruct": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2-57B-A14B-Instruct",
@@ -215,6 +240,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             # Qwen Pre-Quantized Models (GPTQ/AWQ - already quantized, loads faster)
             "qwen2.5-3b-instruct-awq": lambda: HuggingFaceSampler(
@@ -223,6 +249,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen2.5-7b-instruct-awq": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-7B-Instruct-AWQ",
@@ -230,6 +257,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen2.5-7b-instruct-gptq": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4",
@@ -237,6 +265,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen2.5-14b-instruct-awq": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B-Instruct-AWQ",
@@ -244,6 +273,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen2.5-14b-instruct-gptq-int4": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4",
@@ -251,6 +281,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             "qwen3-30b-a3b-instruct-fp8": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen3-30B-A3B-Instruct-2507-FP8",
@@ -258,6 +289,7 @@ def main():
                 temperature=0.7,
                 max_tokens=2048,
                 quantize=quantization,
+                num_gpus=num_gpus,
             ),
             # Dynamic 4-bit quantization (quantizes on load - needs more RAM initially)
             "qwen2.5-14b-instruct-4bit": lambda: HuggingFaceSampler(
@@ -446,8 +478,8 @@ def main():
             ),
         }
 
-    # Get model factories with the quantization argument
-    model_factories = get_model_factories(args.quantize)
+    # Get model factories with the quantization and num_gpus arguments
+    model_factories = get_model_factories(args.quantize, args.num_gpus)
 
     # Auto-generate list of all available models from the factory
     # This ensures the list stays in sync with model_factories
