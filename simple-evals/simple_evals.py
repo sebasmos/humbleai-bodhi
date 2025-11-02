@@ -213,7 +213,7 @@ def main():
                 max_tokens=2048,
                 quantize=quantization,
             ),
-            "qwen2.5-14b-instruct-gptq": lambda: HuggingFaceSampler(
+            "qwen2.5-14b-instruct-gptq-int4": lambda: HuggingFaceSampler(
                 model_choice="Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4",
                 system_message=OPENAI_SYSTEM_MESSAGE_API,
                 temperature=0.7,
@@ -415,7 +415,7 @@ def main():
     "qwen3-30b-a3b", "qwen2.5-14b",
     # Pre-quantized models (AWQ/GPTQ)
     "qwen2.5-3b-instruct-awq", "qwen2.5-7b-instruct-awq", "qwen2.5-7b-instruct-gptq",
-    "qwen2.5-14b-instruct-awq", "qwen2.5-14b-instruct-gptq",
+    "qwen2.5-14b-instruct-awq", "qwen2.5-14b-instruct-gpt-int4",
     # Dynamic quantization models
     "qwen2.5-14b-instruct-4bit", "qwen2.5-14b-4bit",
     # Reasoning models
@@ -464,7 +464,9 @@ def main():
     # This allows both grader and evaluation model to fit on GPU together
     # For better grading quality on larger GPUs, change to Qwen/Qwen2.5-7B-Instruct-AWQ
     grading_sampler = HuggingFaceSampler(
-        model_choice="openai/gpt-oss-120b",
+        #model_choice="openai/gpt-oss-120b",
+        model_choice = "Qwen/Qwen2.5-14B-Instruct-GPTQ-Int4",
+        #model_choice = "Qwen/Qwen2.5-3B-Instruct-AWQ",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,
