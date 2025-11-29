@@ -23,7 +23,7 @@ echo "========================================="
 
 # Load miniforge module
 module load miniforge/24.3.0-0
-pip install sentencepiece
+
 # Navigate to project directory
 cd /orcd/home/002/sebasmos/code/HumbleAILLMs
 
@@ -50,3 +50,4 @@ echo ""
 echo "Final GPU memory usage:"
 nvidia-smi --query-gpu=index,memory.used,memory.total --format=csv
 echo "========================================="
+

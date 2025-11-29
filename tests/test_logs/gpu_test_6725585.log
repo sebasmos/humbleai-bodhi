@@ -1,0 +1,163 @@
+=========================================
+Multi-GPU Diagnostic Tests
+=========================================
+Job started at: Thu Nov 27 20:39:10 EST 2025
+Running on node: node3300
+Job ID: 6725585
+=========================================
+
+Environment Info:
+-----------------
+Python: /orcd/software/core/001/pkg/miniforge/24.3.0-0/bin/python
+PyTorch version: 2.5.1
+/orcd/software/core/001/pkg/miniforge/24.3.0-0/lib/python3.10/site-packages/transformers/utils/hub.py:128: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+Transformers version: 4.47.0
+
+GPU Information:
+----------------
+GPU 0: NVIDIA H200 (UUID: GPU-c8379491-8104-d6bc-fc4f-86d3af9554bf)
+GPU 1: NVIDIA H200 (UUID: GPU-1ff00a7c-32d0-6373-36f5-afbd9df3995f)
+
+index, name, memory.total [MiB], memory.free [MiB]
+0, NVIDIA H200, 143771 MiB, 143071 MiB
+1, NVIDIA H200, 143771 MiB, 143071 MiB
+
+CUDA Environment Variables:
+---------------------------
+CUDA_VISIBLE_DEVICES: 0,1
+CUDA_HOME: not set
+
+=========================================
+Running Quick Tests (no 70B model)
+=========================================
+/orcd/software/core/001/pkg/miniforge/24.3.0-0/lib/python3.10/site-packages/transformers/utils/hub.py:128: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.
+Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.
+============================================================
+HumbleAILLMs Multi-GPU Diagnostic Tests
+============================================================
+Test mode: quick
+Num GPUs: 2
+Quantization: None
+
+============================================================
+TEST 1: GPU Detection
+============================================================
+PyTorch version: 2.5.1
+CUDA available: True
+Number of GPUs detected: 2
+CUDA_VISIBLE_DEVICES: 0,1
+
+GPU 0: NVIDIA H200
+  Total Memory: 139.7 GB
+  Compute Capability: 9.0
+  Basic CUDA operation: PASS
+
+GPU 1: NVIDIA H200
+  Total Memory: 139.7 GB
+  Compute Capability: 9.0
+  Basic CUDA operation: PASS
+
+TEST 1: PASS
+
+============================================================
+TEST 2: Small Model Loading (GPT-Neo 125M)
+============================================================
+Loading EleutherAI/gpt-neo-125m...
+Model loaded in 8.10s
+Test inference: 'Hello, how are you?
+
+I'm a newbie in the world...'
+
+TEST 2: PASS
+
+============================================================
+TEST 3: Multi-GPU Model Loading (2 GPUs)
+============================================================
+Loading EleutherAI/gpt-neo-1.3B with device_map='auto'...
+Available GPUs: 2, Using: 2
+  GPU 0 memory before: 0.03 GB
+  GPU 1 memory before: 0.03 GB
+Model loaded in 36.33s
+
+Memory after loading:
+  GPU 0: 1.40 GB (delta: +1.37 GB)
+  GPU 1: 1.20 GB (delta: +1.17 GB)
+Model spread across devices: {0, 1}
+
+Running inference test...
+Inference took 0.55s
+Response: 'The capital of France is Paris, the largest city in Europe. It is also the capital of France, and the largest city'
+
+TEST 3: PASS
+
+============================================================
+TEST 5: Inference Throughput (Hang Detection)
+============================================================
+
+Running 5 inference requests...
+  [1/5] 0.53s - 'What is the capital of France?
+
+The capital of Fra...'
+  [2/5] 0.52s - 'Explain photosynthesis in one sentence.
+
+A:
+
+The p...'
+  [3/5] 0.50s - 'Write a haiku about programming.
+
+I’ve been workin...'
+  [4/5] 0.50s - 'What is 15 * 23?
+115
+What is the product of -0.5 a...'
+  [5/5] 0.52s - 'Name three primary colors.
+
+The first color is the...'
+
+Average inference time: 0.51s
+Total time: 2.57s
+
+TEST 5: PASS
+
+============================================================
+TEST 6: Concurrent Models (Eval + Grader)
+============================================================
+Loading eval model: EleutherAI/gpt-neo-125m
+Loading grader model: EleutherAI/gpt-neo-1.3B
+
+Memory usage with both models loaded:
+  GPU 0: 1.69 GB
+  GPU 1: 1.20 GB
+
+Testing inference on eval model...
+  Eval model response: Hello, I'm a newbie in the world of
+Testing inference on grader model...
+  Grader model response: Hello, I'm a newbie to the forum.
+
+TEST 6: PASS
+
+============================================================
+TEST SUMMARY
+============================================================
+  gpu_detection: PASS
+  small_model: PASS
+  multigpu: PASS
+  inference: PASS
+  concurrent: PASS
+============================================================
+All tests PASSED!
+
+=========================================
+Quick Tests completed with exit code: 0
+=========================================
+
+=========================================
+Tests completed at: Thu Nov 27 20:40:16 EST 2025
+
+Final GPU memory usage:
+index, memory.used [MiB], memory.total [MiB]
+0, 0 MiB, 143771 MiB
+1, 0 MiB, 143771 MiB
+=========================================

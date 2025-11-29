@@ -53,7 +53,7 @@ def main():
     parser.add_argument(
         "--n-threads",
         type=int,
-        default=2,
+        default=1,
         help="Number of threads to run. Only supported for HealthBench and HealthBenchMeta.",
     )
     parser.add_argument("--debug", action="store_true", help="Run in debug mode")
@@ -518,8 +518,9 @@ def main():
     # For smaller GPUs, swap to Qwen/Qwen2.5-3B-Instruct-AWQ before running
     grading_sampler = HuggingFaceSampler(
         #model_choice="openai/gpt-oss-120b",
-        model_choice = "Qwen/Qwen2.5-14B-Instruct-AWQ",
+        #model_choice = "Qwen/Qwen2.5-14B-Instruct-AWQ",
         #model_choice = "Qwen/Qwen2.5-3B-Instruct-AWQ",
+        model_choice = "meta-llama/Llama-3.3-70B-Instruct",
         system_message=OPENAI_SYSTEM_MESSAGE_API,
         temperature=0.3,  # Lower temperature for more consistent grading
         max_tokens=2048,
