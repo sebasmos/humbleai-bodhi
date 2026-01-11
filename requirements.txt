@@ -26,6 +26,10 @@ anthropic>=0.18.0
 # auto-gptq>=0.6.0      # Requires CUDA
 # autoawq>=0.1.8        # Requires CUDA
 
+# HumanEval benchmark (optional - for code evaluation)
+# Install with: pip install git+https://github.com/openai/human-eval.git
+# Or clone locally: git clone https://github.com/openai/human-eval.git
+
 # HuggingFace utilities
 huggingface-hub>=0.20.0
 

@@ -1,6 +1,6 @@
-# HumbleAILLMs - Multi-GPU Evaluation System
+# BODHI: Bridging, Open, Discerning, Humble, Inquiring
 
-A complete system for running LLM evaluations with automatic multi-GPU support.
+  BODHI framework - Epistemic humility and curiosity for medical AI decision support
 
 ## Quick Start (Mac - Apple Silicon)
 
@@ -56,6 +56,21 @@ export ANTHROPIC_API_KEY="your-key-here"
 export HF_TOKEN="your-hf-token-here"  # Get from https://huggingface.co/settings/tokens
 ```
 
+## HumanEval Benchmark Setup (Optional)
+
+If you want to run the HumanEval code evaluation benchmark, install the `human-eval` package:
+
+```bash
+# Option 1: Clone into the project directory (recommended)
+cd HumbleAILLMs
+git clone https://github.com/openai/human-eval.git
+
+# Option 2: Install via pip
+pip install git+https://github.com/openai/human-eval.git
+```
+
+> **Note**: HumanEval is optional. If not installed, the test suite will skip related tests.
+
 ## Download Recommended Models (Pre-Quantized for Efficiency)
 
 **IMPORTANT**: The default grader in `simple_evals.py` is `Qwen/Qwen2.5-14B-Instruct-AWQ` (~7GB VRAM). Install it before you launch evaluations:
@@ -95,7 +110,7 @@ python -m simple-evals.simple_evals --model=gpt-4.1 --eval=mmlu --examples=1
 python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=mmlu --examples=1
 
 # Test with local model
-python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=healthbench_consensus --examples=1
+python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=healthbench_consensus --examples=10
 ```
 
 ## Available Local Models
@@ -162,6 +177,46 @@ python -m simple-evals.simple_evals --model=Qwen/Qwen2-72B-Instruct --eval=healt
 # All HealthBench variants in one go
 python -m simple-evals.simple_evals --model=qwen2.5-14b-instruct-awq --eval=healthbench,healthbench_hard,healthbench_consensus --examples=10
 ```
+
+## EUDEAS Mode (Uncertainty-Aware Evaluation)
+
+EUDEAS (Epistemic Uncertainty-Driven Evaluation and Scoring) adds structured uncertainty reasoning to HealthBench evaluations using PRECISE-U prompting and EVS (Epistemic Virtues Score).
+
+### Usage
+
+```bash
+# Run with EUDEAS mode (adds _eudeas suffix to output files)
+python -m simple-evals.simple_evals --model=gpt-4o --eval=healthbench_consensus --use-eudeas
+
+# Compare baseline vs EUDEAS
+python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=healthbench_consensus --examples=10
+python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=healthbench_consensus --examples=10 --use-eudeas
+```
+
+### Benchmark Results (20 samples)
+
+| Model | Mode | HealthBench Score | EVS |
+|-------|------|------------------|-----|
+| GPT-4o-mini | **Baseline** | **88.3%** | - |
+| GPT-4o-mini | EUDEAS | 80.0% | 0.83 |
+
+**Current status**: EUDEAS provides EVS metrics (epistemic calibration) but doesn't yet improve accuracy. The structured PRECISE-U reasoning adds overhead. Further prompt tuning needed.
+
+See [Results/results.md](Results/results.md) for detailed analysis and next steps.
+
+### PRECISE-U Framework
+
+EUDEAS uses the PRECISE-U structured prompting template:
+- **P** - Probabilistic differential diagnosis
+- **R** - Red flags identification
+- **E** - Explore uncertainties (Data, Model, OOD, Structural)
+- **C** - Calculate confidence
+- **I** - Information needs
+- **S** - Safety nets
+- **E** - Explain to patient
+- **U** - Update plan
+
+Output files with EUDEAS enabled have `_eudeas` suffix for easy identification.
 
 ## Key Parameters
 

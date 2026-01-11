@@ -60,12 +60,14 @@ show_help() {
     echo "  --imports     Test all Python imports"
     echo "  --env         Test conda environment setup"
     echo "  --gpu         Test GPU/CUDA availability"
+    echo "  --eudeas      Test EUDEAS module (PRECISE-U + EVS)"
     echo "  --all         Run all tests"
     echo "  --quick       Quick test (env + basic imports only)"
     echo "  --help        Show this help message"
     echo ""
     echo "Examples:"
     echo "  ./tests/test_setup.sh --imports"
+    echo "  ./tests/test_setup.sh --eudeas"
     echo "  ./tests/test_setup.sh --all"
 }
 
@@ -212,11 +214,24 @@ def test_import(import_statement, display_name):
         print(f"  \033[0;31m[FAIL]\033[0m {display_name} - {e}")
         return False
 
-# human-eval imports
-print("\n--- human-eval Package ---")
-test_import("from human_eval.data import read_problems, HUMAN_EVAL", "human_eval.data")
-test_import("from human_eval.evaluation import estimate_pass_at_k", "human_eval.evaluation")
-test_import("from human_eval.execution import check_correctness", "human_eval.execution")
+# human-eval imports (optional - skip if not installed)
+print("\n--- human-eval Package (Optional) ---")
+# Check if human-eval directory exists locally
+human_eval_local = os.path.exists(os.path.join(project_root, 'human-eval'))
+if human_eval_local:
+    test_import("from human_eval.data import read_problems, HUMAN_EVAL", "human_eval.data")
+    test_import("from human_eval.evaluation import estimate_pass_at_k", "human_eval.evaluation")
+    test_import("from human_eval.execution import check_correctness", "human_eval.execution")
+else:
+    # Try pip-installed version
+    try:
+        from human_eval.data import read_problems
+        read_problems()  # Test if data file exists
+        print(f"  \033[0;32m[PASS]\033[0m human_eval (pip installed with data)")
+    except FileNotFoundError:
+        print(f"  \033[1;33m[SKIP]\033[0m human_eval.data (data file missing - see README for setup)")
+    except ImportError:
+        print(f"  \033[1;33m[SKIP]\033[0m human_eval (not installed - optional for HumanEval benchmark)")
 
 # simple-evals imports (test as module to handle relative imports)
 print("\n--- simple-evals Package ---")
@@ -301,15 +316,43 @@ EOF
 }
 
 test_human_eval_module() {
-    print_header "Testing human-eval Module Execution"
+    print_header "Testing human-eval Module Execution (Optional)"
 
     cd "$PROJECT_ROOT"
 
-    # Test running human_eval as a module (using local path)
-    if python -c "import sys; sys.path.insert(0, 'human-eval'); from human_eval.data import read_problems; problems = read_problems(); print(f'  Loaded {len(problems)} problems')" 2>/dev/null; then
-        print_pass "human_eval.data module works"
+    # Check if human-eval directory exists locally first
+    if [ -d "human-eval" ]; then
+        # Test running human_eval as a module (using local path)
+        if python -c "import sys; sys.path.insert(0, 'human-eval'); from human_eval.data import read_problems; problems = read_problems(); print(f'  Loaded {len(problems)} problems')" 2>/dev/null; then
+            print_pass "human_eval.data module works (local)"
+        else
+            print_fail "human_eval.data module failed"
+        fi
     else
-        print_fail "human_eval.data module failed"
+        # Try pip-installed version
+        if python -c "from human_eval.data import read_problems; problems = read_problems(); print(f'  Loaded {len(problems)} problems')" 2>/dev/null; then
+            print_pass "human_eval.data module works (pip installed)"
+        else
+            print_skip "human-eval not configured (optional - see README for HumanEval setup)"
+        fi
+    fi
+}
+
+test_eudeas() {
+    print_header "Testing EUDEAS Module"
+
+    cd "$PROJECT_ROOT"
+
+    # Run the dedicated EUDEAS test script (use python3 if python not available)
+    PYTHON_CMD="python"
+    if ! command -v python &> /dev/null; then
+        PYTHON_CMD="python3"
+    fi
+
+    if $PYTHON_CMD -m tests.test_eudeas; then
+        print_pass "EUDEAS module tests"
+    else
+        print_fail "EUDEAS module tests"
     fi
 }
 
@@ -353,6 +396,10 @@ case "${1:-}" in
         test_gpu
         print_summary
         ;;
+    --eudeas)
+        test_eudeas
+        print_summary
+        ;;
     --quick)
         test_conda_env
         test_core_imports
@@ -364,10 +411,11 @@ case "${1:-}" in
         test_project_imports
         test_gpu
         test_human_eval_module
+        test_eudeas
         print_summary
         ;;
     *)
-        echo "Usage: $0 [--imports|--env|--gpu|--all|--quick|--help]"
+        echo "Usage: $0 [--imports|--env|--gpu|--eudeas|--all|--quick|--help]"
         echo "Run '$0 --help' for more information."
         exit 1
         ;;

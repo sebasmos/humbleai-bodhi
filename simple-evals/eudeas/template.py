@@ -21,6 +21,8 @@ class PRECISEUTemplate:
 
     START = "### START OUTPUT"
     END = "### END OUTPUT"
+    FINAL_START = "### FINAL RESPONSE"
+    FINAL_END = "### END FINAL RESPONSE"
 
     # Micro-example showing expected format
     MICRO = (
@@ -167,6 +169,17 @@ Humility: hhh
 Curiosity: qqq
 {PRECISEUTemplate.END}
 
+{PRECISEUTemplate.FINAL_START}
+Now write your FINAL RESPONSE to the patient/user. This should be a natural, conversational response that:
+- Directly addresses their question/concern
+- Is helpful and medically appropriate
+- Uses plain language (not structured format)
+- Incorporates the epistemic reasoning you did above (express appropriate uncertainty, seek information if needed)
+- Does NOT include the PRECISE-U headers or numeric scores
+
+Write your response here:
+{PRECISEUTemplate.FINAL_END}
+
 Prompts to emphasize (top-5):
 {prompts_text}
 """
@@ -174,13 +187,48 @@ Prompts to emphasize (top-5):
     @staticmethod
     def extract_response(raw_text: str) -> str:
         """
-        Extract the response between START and END markers.
+        Extract the FINAL RESPONSE (natural language) from the EUDEAS output.
+
+        This extracts the clean response that should be evaluated by the grader,
+        not the full PRECISE-U structured output.
 
         Args:
             raw_text: Raw model output
 
         Returns:
-            Extracted response text, or original if markers not found
+            Extracted natural response for grading
+        """
+        # First try to extract the FINAL RESPONSE section (preferred)
+        final_start_idx = raw_text.find(PRECISEUTemplate.FINAL_START)
+        final_end_idx = raw_text.rfind(PRECISEUTemplate.FINAL_END)
+
+        if final_start_idx != -1 and final_end_idx != -1 and final_end_idx > final_start_idx:
+            # Extract just the final response
+            final_section = raw_text[final_start_idx + len(PRECISEUTemplate.FINAL_START):final_end_idx].strip()
+            # Remove the instruction text if present
+            if "Write your response here:" in final_section:
+                final_section = final_section.split("Write your response here:")[-1].strip()
+            return final_section
+
+        # Fallback: try to extract from START/END markers
+        start_idx = raw_text.find(PRECISEUTemplate.START)
+        end_idx = raw_text.rfind(PRECISEUTemplate.END)
+
+        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+            return raw_text[start_idx + len(PRECISEUTemplate.START):end_idx].strip()
+
+        return raw_text.strip()
+
+    @staticmethod
+    def extract_full_eudeas(raw_text: str) -> str:
+        """
+        Extract the full PRECISE-U structured output for EVS calculation.
+
+        Args:
+            raw_text: Raw model output
+
+        Returns:
+            Full PRECISE-U structured text for metrics extraction
         """
         start_idx = raw_text.find(PRECISEUTemplate.START)
         end_idx = raw_text.rfind(PRECISEUTemplate.END)

@@ -2,11 +2,13 @@ import argparse
 import json
 import subprocess
 from datetime import datetime
+from typing import Optional
 
 import pandas as pd
 
 from . import common
 from .browsecomp_eval import BrowseCompEval
+from .eudeas import EUDEASSamplerWrapper, EUDEASScorer
 from .drop_eval import DropEval
 from .gpqa_eval import GPQAEval
 from .healthbench_eval import HealthBenchEval
@@ -72,6 +74,11 @@ def main():
         type=int,
         default=None,
         help="Number of GPUs to use for model parallelism. Default: use all available GPUs.",
+    )
+    parser.add_argument(
+        "--use-eudeas",
+        action="store_true",
+        help="Enable EUDEAS mode (PRECISE-U prompting + EVS metrics). Only for HealthBench evals.",
     )
 
     args = parser.parse_args()
@@ -503,6 +510,14 @@ def main():
         # If no model specified, initialize all models (original behavior, but lazy)
         models = {model_name: model_factories[model_name]() for model_name in available_models}
 
+    # Wrap models with EUDEAS if enabled
+    if args.use_eudeas:
+        print("EUDEAS mode enabled - wrapping samplers with PRECISE-U prompting")
+        models = {
+            model_name: EUDEASSamplerWrapper(sampler)
+            for model_name, sampler in models.items()
+        }
+
     print(f"Running with args {args}")
 
     grading_sampler = ChatCompletionSampler(
@@ -642,7 +657,9 @@ def main():
 
     print(evals)
     debug_suffix = "_DEBUG" if args.debug else ""
-    print(debug_suffix)
+    eudeas_suffix = "_eudeas" if args.use_eudeas else ""
+    file_suffix = f"{eudeas_suffix}{debug_suffix}"
+    print(f"File suffix: {file_suffix}")
     mergekey2resultpath = {}
     print(f"Running the following evals: {list(evals.keys())}")
     print(f"Running evals for the following models: {list(models.keys())}")
@@ -656,7 +673,7 @@ def main():
             file_stem = f"{eval_name}_{model_name}"
             # file stem should also include the year, month, day, and time in hours and minutes
             file_stem += f"_{date_str}"
-            report_filename = f"/tmp/{file_stem}{debug_suffix}.html"
+            report_filename = f"/tmp/{file_stem}{file_suffix}.html"
             print(f"Writing report to {report_filename}")
             with open(report_filename, "w") as fh:
                 fh.write(common.make_report(result))
@@ -665,12 +682,12 @@ def main():
             # Sort metrics by key
             metrics = dict(sorted(metrics.items()))
             print(metrics)
-            result_filename = f"/tmp/{file_stem}{debug_suffix}.json"
+            result_filename = f"/tmp/{file_stem}{file_suffix}.json"
             with open(result_filename, "w") as f:
                 f.write(json.dumps(metrics, indent=2))
             print(f"Writing results to {result_filename}")
 
-            full_result_filename = f"/tmp/{file_stem}{debug_suffix}_allresults.json"
+            full_result_filename = f"/tmp/{file_stem}{file_suffix}_allresults.json"
             with open(full_result_filename, "w") as f:
                 result_dict = {
                     "score": result.score,

@@ -502,6 +502,26 @@ class HealthBenchEval(Eval):
                 )
             )
 
+            # Extract EUDEAS metrics if available
+            eudeas_metadata = None
+            if self.physician_completions_mode is None:
+                eudeas_metadata = response_dict.get("eudeas", None)
+                if eudeas_metadata:
+                    # Add EUDEAS metrics to the metrics dict
+                    metrics["eudeas:evs"] = eudeas_metadata.get("evs", 0.0)
+                    components = eudeas_metadata.get("components", {})
+                    metrics["eudeas:u_data"] = components.get("u_data", 0.0)
+                    metrics["eudeas:u_model"] = components.get("u_model", 0.0)
+                    metrics["eudeas:u_ood"] = components.get("u_ood", 0.0)
+                    metrics["eudeas:u_struct"] = components.get("u_struct", 0.0)
+                    metrics["eudeas:total_uncertainty"] = components.get("total_uncertainty", 0.0)
+                    metrics["eudeas:complexity"] = components.get("complexity", 0.0)
+                    metrics["eudeas:confidence"] = components.get("confidence", 0.0)
+                    metrics["eudeas:humility"] = components.get("humility", 0.0)
+                    metrics["eudeas:curiosity"] = components.get("curiosity", 0.0)
+                    metrics["eudeas:h_star"] = components.get("h_star", 0.0)
+                    metrics["eudeas:q_star"] = components.get("q_star", 0.0)
+
             score = metrics["overall_score"]
 
             # Create HTML for each sample result
@@ -520,22 +540,27 @@ class HealthBenchEval(Eval):
             convo = actual_queried_prompt_messages + [
                 dict(content=response_text, role="assistant")
             ]
+            example_metadata = {
+                "score": score,
+                "usage": get_usage_dict(response_usage),
+                "rubric_items": rubric_items_with_grades,
+                "prompt": actual_queried_prompt_messages,
+                "completion": [dict(content=response_text, role="assistant")],
+                "prompt_id": row["prompt_id"],
+                "completion_id": hashlib.sha256(
+                    (row["prompt_id"] + response_text).encode("utf-8")
+                ).hexdigest(),
+            }
+            # Include EUDEAS metadata if available
+            if eudeas_metadata:
+                example_metadata["eudeas"] = eudeas_metadata
+
             return SingleEvalResult(
                 html=html,
                 score=score,
                 convo=convo,
                 metrics=metrics,
-                example_level_metadata={
-                    "score": score,
-                    "usage": get_usage_dict(response_usage),
-                    "rubric_items": rubric_items_with_grades,
-                    "prompt": actual_queried_prompt_messages,
-                    "completion": [dict(content=response_text, role="assistant")],
-                    "prompt_id": row["prompt_id"],
-                    "completion_id": hashlib.sha256(
-                        (row["prompt_id"] + response_text).encode("utf-8")
-                    ).hexdigest(),
-                },
+                example_level_metadata=example_metadata,
             )
 
         results = common.map_with_progress(
