@@ -505,26 +505,26 @@ def main():
 
     print(f"Running with args {args}")
 
-    # grading_sampler = ChatCompletionSampler(
-    #     model="gpt-4.1-2025-04-14",
-    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
-    #     max_tokens=2048,
-    # )
-    # equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
+    grading_sampler = ChatCompletionSampler(
+        model="gpt-4.1-2025-04-14",
+        system_message=OPENAI_SYSTEM_MESSAGE_API,
+        max_tokens=2048,
+    )
+    equality_checker = ChatCompletionSampler(model="gpt-4-turbo-preview")
 
     # Using local models for grading instead of expensive API calls
     # IMPORTANT: Using AWQ grader to avoid API costs
     # Default: Qwen/Qwen2.5-14B-Instruct-AWQ (~7GB VRAM)
     # For smaller GPUs, swap to Qwen/Qwen2.5-3B-Instruct-AWQ before running
-    grading_sampler = HuggingFaceSampler(
-        #model_choice="openai/gpt-oss-120b",
-        #model_choice = "Qwen/Qwen2.5-14B-Instruct-AWQ",
-        #model_choice = "Qwen/Qwen2.5-3B-Instruct-AWQ",
-        model_choice = "meta-llama/Llama-3.3-70B-Instruct",
-        system_message=OPENAI_SYSTEM_MESSAGE_API,
-        temperature=0.3,  # Lower temperature for more consistent grading
-        max_tokens=2048,
-    )
+    # grading_sampler = HuggingFaceSampler(
+    #     #model_choice="openai/gpt-oss-120b",
+    #     #model_choice = "Qwen/Qwen2.5-14B-Instruct-AWQ",
+    #     #model_choice = "Qwen/Qwen2.5-3B-Instruct-AWQ",
+    #     model_choice = "meta-llama/Llama-3.3-70B-Instruct",
+    #     system_message=OPENAI_SYSTEM_MESSAGE_API,
+    #     temperature=0.3,  # Lower temperature for more consistent grading
+    #     max_tokens=2048,
+    # )
     # equality_checker = HuggingFaceSampler(
     #     # model_choice="EleutherAI/gpt-neo-1.3B",
     #     model_choice="openai/gpt-oss-20b",

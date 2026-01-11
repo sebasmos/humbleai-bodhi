@@ -4,6 +4,14 @@ Mark Chen and Jerry Tworek and Heewoo Jun and Qiming Yuan and Henrique Ponde de 
 https://arxiv.org/abs/2107.03374 https://github.com/openai/human-eval/
 """
 
+import os
+import sys
+
+# Add human-eval to path (sibling directory)
+_human_eval_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'human-eval')
+if _human_eval_path not in sys.path:
+    sys.path.insert(0, _human_eval_path)
+
 import random
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed

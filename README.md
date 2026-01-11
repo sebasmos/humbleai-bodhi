@@ -1,21 +1,58 @@
 # HumbleAILLMs - Multi-GPU Evaluation System
 
-# Simple-Evals Setup Guide
+A complete system for running LLM evaluations with automatic multi-GPU support.
 
-## Installation
+## Quick Start (Mac - Apple Silicon)
 
 ```bash
-# Clone repository
+# 1. Install Homebrew (if not installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 2. Install Miniforge (conda for Apple Silicon)
+brew install --cask miniforge
+conda init "$(basename "${SHELL}")"
+source ~/.zshrc  # or restart terminal
+
+# 3. Create and activate environment
+conda create -n humbleai python=3.10 -y
+conda activate humbleai
+
+# 4. Clone and install
 git clone https://github.com/sebasmos/HumbleAILLMs.git
+cd HumbleAILLMs
+pip install -r requirements.txt
 
-# Install dependencies
-pip install tabulate optimum gptqmodel auto-gptq torch transformers accelerate openai anthropic human-eval bitsandbytes autoawq auto-gptq
+# 5. Verify installation
+./tests/test_setup.sh --imports
+```
 
-# Optional: Set API keys for cloud models (not needed for local models)
+## Quick Start (Linux/CUDA)
+
+```bash
+# 1. Create conda environment
+conda create -n humbleai python=3.10 -y
+conda activate humbleai
+
+# 2. Clone and install
+git clone https://github.com/sebasmos/HumbleAILLMs.git
+cd HumbleAILLMs
+pip install -r requirements.txt
+
+# 3. Install CUDA-specific packages (optional, for quantization)
+pip install bitsandbytes auto-gptq autoawq
+
+# 4. Verify installation
+./tests/test_setup.sh --all
+```
+
+## Environment Variables (Optional)
+
+```bash
+# For cloud model evaluation
 export OPENAI_API_KEY="your-key-here"
 export ANTHROPIC_API_KEY="your-key-here"
 
-# Optional: Set HuggingFace token for gated models (MedGemma, etc.)
+# For gated models (MedGemma, Llama, etc.)
 export HF_TOKEN="your-hf-token-here"  # Get from https://huggingface.co/settings/tokens
 ```
 
@@ -55,8 +92,10 @@ python -m simple-evals.simple_evals --list-models
 # Test with API model
 python -m simple-evals.simple_evals --model=gpt-4.1 --eval=mmlu --examples=1
 
+python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=mmlu --examples=1
+
 # Test with local model
-python -m simple-evals.simple_evals --model=gpt-neo-1.3b --eval=mmlu --examples=10
+python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=healthbench_consensus --examples=1
 ```
 
 ## Available Local Models
