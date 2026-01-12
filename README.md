@@ -1,6 +1,10 @@
 # BODHI: Bridging, Open, Discerning, Humble, Inquiring
 
-  BODHI framework - Epistemic humility and curiosity for medical AI decision support
+[![PLOS Digital Health](https://img.shields.io/badge/PLOS_Digital_Health-10.1371/journal.pdig.0001013-blue)](https://journals.plos.org/digitalhealth/article?id=10.1371/journal.pdig.0001013)
+[![The Lancet](https://img.shields.io/badge/The_Lancet-10.1016/S0140--6736(25)01626--5-red)](https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(25)01626-5/fulltext)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+BODHI framework - Epistemic humility and curiosity for medical AI decision support
 
 ## Quick Start (Mac - Apple Silicon)
 
@@ -234,3 +238,31 @@ Results saved to `/tmp/` as:
 Complete system for running LLM evaluations on MIT Engaging cluster with automatic multi-GPU support.
 
 ---
+
+## Citation
+
+If you use this software, please cite the following papers:
+
+```bibtex
+@article{cajas2026beyond,
+  title={Beyond overconfidence: Embedding curiosity and humility for ethical medical AI},
+  author={Cajas Ord{\'o}{\~n}ez, Sebasti{\'a}n Andr{\'e}s and Castro, Rowell and Celi, Leo Anthony and Delos Reyes, Roben and Engelmann, Justin and Ercole, Ari and Hilel, Almog and Kalla, Mahima and Kinyera, Leo and Lange, Maximin and others},
+  journal={PLOS Digital Health},
+  volume={5},
+  number={1},
+  pages={e0001013},
+  year={2026},
+  publisher={Public Library of Science San Francisco, CA USA}
+}
+
+@article{ordonez2025humility,
+  title={Humility and curiosity in human--AI systems for health care},
+  author={Ordo{\~n}ez, Sebasti{\'a}n Andr{\'e}s Cajas and Lange, Maximin and Lunde, Torleif Markussen and Meni, Mackenzie J and Premo, Anna E},
+  journal={The Lancet},
+  volume={406},
+  number={10505},
+  pages={804--805},
+  year={2025},
+  publisher={Elsevier}
+}
+```
