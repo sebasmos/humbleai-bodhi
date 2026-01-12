@@ -1,0 +1,103 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated papers."
+type: software
+title: "BODHI: Bridging, Open, Discerning, Humble, Inquiring - Epistemic humility and curiosity for medical AI"
+version: "1.0.0"
+doi: "10.1371/journal.pdig.0001013"
+url: "https://github.com/sebasmos/HumbleAILLMs"
+repository-code: "https://github.com/sebasmos/HumbleAILLMs"
+authors:
+  - family-names: "Cajas Ordóñez"
+    given-names: "Sebastián Andrés"
+  - family-names: "Castro"
+    given-names: "Rowell"
+  - family-names: "Celi"
+    given-names: "Leo Anthony"
+  - family-names: "Delos Reyes"
+    given-names: "Roben"
+  - family-names: "Engelmann"
+    given-names: "Justin"
+  - family-names: "Ercole"
+    given-names: "Ari"
+  - family-names: "Hilel"
+    given-names: "Almog"
+  - family-names: "Kalla"
+    given-names: "Mahima"
+  - family-names: "Kinyera"
+    given-names: "Leo"
+  - family-names: "Lange"
+    given-names: "Maximin"
+  - family-names: "Lunde"
+    given-names: "Torleif Markussen"
+  - family-names: "Meni"
+    given-names: "Mackenzie J"
+  - family-names: "Premo"
+    given-names: "Anna E"
+date-released: "2026-01-01"
+license: "CC-BY-NC-SA-4.0"
+keywords:
+  - "artificial intelligence"
+  - "medical AI"
+  - "epistemic humility"
+  - "uncertainty quantification"
+  - "large language models"
+  - "healthcare"
+  - "clinical decision support"
+  - "BODHI framework"
+preferred-citation:
+  type: article
+  title: "Beyond overconfidence: Embedding curiosity and humility for ethical medical AI"
+  authors:
+    - family-names: "Cajas Ordóñez"
+      given-names: "Sebastián Andrés"
+    - family-names: "Castro"
+      given-names: "Rowell"
+    - family-names: "Celi"
+      given-names: "Leo Anthony"
+    - family-names: "Delos Reyes"
+      given-names: "Roben"
+    - family-names: "Engelmann"
+      given-names: "Justin"
+    - family-names: "Ercole"
+      given-names: "Ari"
+    - family-names: "Hilel"
+      given-names: "Almog"
+    - family-names: "Kalla"
+      given-names: "Mahima"
+    - family-names: "Kinyera"
+      given-names: "Leo"
+    - family-names: "Lange"
+      given-names: "Maximin"
+  journal: "PLOS Digital Health"
+  volume: 5
+  issue: 1
+  start: e0001013
+  year: 2026
+  doi: "10.1371/journal.pdig.0001013"
+  url: "https://journals.plos.org/digitalhealth/article?id=10.1371/journal.pdig.0001013"
+  publisher:
+    name: "Public Library of Science"
+references:
+  - type: article
+    title: "Humility and curiosity in human-AI systems for health care"
+    authors:
+      - family-names: "Cajas Ordóñez"
+        given-names: "Sebastián Andrés"
+      - family-names: "Lange"
+        given-names: "Maximin"
+      - family-names: "Lunde"
+        given-names: "Torleif Markussen"
+      - family-names: "Meni"
+        given-names: "Mackenzie J"
+      - family-names: "Premo"
+        given-names: "Anna E"
+    journal: "The Lancet"
+    volume: 406
+    issue: 10505
+    start: 804
+    end: 805
+    year: 2025
+    doi: "10.1016/S0140-6736(25)01626-5"
+    url: "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(25)01626-5/fulltext"
+    publisher:
+      name: "Elsevier"
