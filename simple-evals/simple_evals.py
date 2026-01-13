@@ -695,6 +695,12 @@ def main():
 
     now = datetime.now()
     date_str = now.strftime("%Y%m%d_%H%M%S")
+
+    # Save results to Results folder instead of /tmp
+    import os
+    results_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Results")
+    os.makedirs(results_dir, exist_ok=True)
+
     for model_name, sampler in models.items():
         for eval_name, eval_obj in evals.items():
             result = eval_obj(sampler)
@@ -702,7 +708,7 @@ def main():
             file_stem = f"{eval_name}_{model_name}"
             # file stem should also include the year, month, day, and time in hours and minutes
             file_stem += f"_{date_str}"
-            report_filename = f"/tmp/{file_stem}{file_suffix}.html"
+            report_filename = f"{results_dir}/{file_stem}{file_suffix}.html"
             print(f"Writing report to {report_filename}")
             with open(report_filename, "w") as fh:
                 fh.write(common.make_report(result))
@@ -711,12 +717,12 @@ def main():
             # Sort metrics by key
             metrics = dict(sorted(metrics.items()))
             print(metrics)
-            result_filename = f"/tmp/{file_stem}{file_suffix}.json"
+            result_filename = f"{results_dir}/{file_stem}{file_suffix}.json"
             with open(result_filename, "w") as f:
                 f.write(json.dumps(metrics, indent=2))
             print(f"Writing results to {result_filename}")
 
-            full_result_filename = f"/tmp/{file_stem}{file_suffix}_allresults.json"
+            full_result_filename = f"{results_dir}/{file_stem}{file_suffix}_allresults.json"
             with open(full_result_filename, "w") as f:
                 result_dict = {
                     "score": result.score,
