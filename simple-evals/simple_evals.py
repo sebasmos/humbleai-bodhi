@@ -8,7 +8,7 @@ import pandas as pd
 
 from . import common
 from .browsecomp_eval import BrowseCompEval
-from .eudeas import EUDEASSamplerWrapper, EUDEASScorer, ThinkThenAnswerWrapper
+from .bodhi_wrapper import BODHIWrapper
 from .drop_eval import DropEval
 from .gpqa_eval import GPQAEval
 from .healthbench_eval import HealthBenchEval
@@ -76,26 +76,9 @@ def main():
         help="Number of GPUs to use for model parallelism. Default: use all available GPUs.",
     )
     parser.add_argument(
-        "--use-eudeas",
+        "--use-bodhi",
         action="store_true",
-        help="Enable EUDEAS mode (PRECISE-U prompting + EVS metrics). Only for HealthBench evals.",
-    )
-    parser.add_argument(
-        "--use-tta",
-        action="store_true",
-        help="Enable Think-Then-Answer mode (epistemic reasoning as internal CoT). Simpler than EUDEAS.",
-    )
-    parser.add_argument(
-        "--tta-two-pass",
-        action="store_true",
-        help="Use two-pass mode for Think-Then-Answer (analysis then response). More thorough but slower.",
-    )
-    parser.add_argument(
-        "--tta-calibration",
-        type=int,
-        default=1,
-        choices=[0, 1, 2, 3, 4, 5, 6, 7],
-        help="Calibration version: 0=simple, 1=H*/Q*, 2=behavioral, 3=insights, 4=minimal, 5=healthbench, 6=curious-humble, 7=simple-actionable.",
+        help="Enable BODHI mode using the bodhi-llm pip package for epistemic reasoning with curiosity and humility.",
     )
 
     args = parser.parse_args()
@@ -527,22 +510,11 @@ def main():
         # If no model specified, initialize all models (original behavior, but lazy)
         models = {model_name: model_factories[model_name]() for model_name in available_models}
 
-    # Wrap models with EUDEAS if enabled
-    if args.use_eudeas:
-        print("EUDEAS mode enabled - wrapping samplers with PRECISE-U prompting")
+    # Wrap models with BODHI if enabled (uses bodhi-llm pip package)
+    if args.use_bodhi:
+        print("BODHI mode enabled - using bodhi-llm package for epistemic reasoning")
         models = {
-            model_name: EUDEASSamplerWrapper(sampler)
-            for model_name, sampler in models.items()
-        }
-
-    # Wrap models with Think-Then-Answer if enabled
-    if args.use_tta:
-        two_pass = args.tta_two_pass
-        calibration_version = args.tta_calibration
-        mode_str = f"two-pass-v{calibration_version}" if two_pass else "single-pass"
-        print(f"Think-Then-Answer mode enabled ({mode_str}) - wrapping samplers with calibrated epistemic CoT prompting")
-        models = {
-            model_name: ThinkThenAnswerWrapper(sampler, two_pass=two_pass, calibration_version=calibration_version)
+            model_name: BODHIWrapper(sampler, domain="medical", two_pass=True)
             for model_name, sampler in models.items()
         }
 
@@ -685,9 +657,8 @@ def main():
 
     print(evals)
     debug_suffix = "_DEBUG" if args.debug else ""
-    eudeas_suffix = "_eudeas" if args.use_eudeas else ""
-    tta_suffix = "_tta" if args.use_tta else ""
-    file_suffix = f"{eudeas_suffix}{tta_suffix}{debug_suffix}"
+    bodhi_suffix = "_bodhi" if args.use_bodhi else ""
+    file_suffix = f"{bodhi_suffix}{debug_suffix}"
     print(f"File suffix: {file_suffix}")
     mergekey2resultpath = {}
     print(f"Running the following evals: {list(evals.keys())}")
@@ -696,9 +667,10 @@ def main():
     now = datetime.now()
     date_str = now.strftime("%Y%m%d_%H%M%S")
 
-    # Save results to Results folder instead of /tmp
+    # Save results to Results folder
     import os
-    results_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Results")
+    results_folder = "Results"
+    results_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), results_folder)
     os.makedirs(results_dir, exist_ok=True)
 
     for model_name, sampler in models.items():
