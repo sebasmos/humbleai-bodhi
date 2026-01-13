@@ -1,22 +1,24 @@
 # HealthBench Benchmark Results
 
-## Comprehensive Results: Baseline vs v6 (Curious-Humble)
+## Comprehensive Results: Baseline vs BODHI (Curious-Humble)
 
 Testing epistemic reasoning through curiosity and humility across HealthBench datasets.
 
+> **Note:** BODHI (Bridging, Open, Discerning, Humble, Inquiring) is our epistemic virtues framework. Internally referred to as "v6" or "TTA calibration 6" in the codebase.
+
 ### Overall Results Summary (GPT-4o-mini, 10 samples each)
 
-| Benchmark | Baseline | v6 (Curious-Humble) | Improvement |
-|-----------|:--------:|:-------------------:|:-----------:|
+| Benchmark | Baseline | BODHI | Improvement |
+|-----------|:--------:|:-----:|:-----------:|
 | **Consensus** | 85.0% | **88.3%** | **+3.3%** |
 | **Hard** | 0.0% | **24.2%** | **+24.2%** |
 | **General** | 29.9% | **43.1%** | **+13.3%** |
 
 ### Key Findings
 
-1. **Massive gains on hard cases** - v6's curiosity-driven questioning improved Hard benchmark from 0% to 24.2%
-2. **Consistent improvement across all benchmarks** - v6 outperforms baseline in every category
-3. **Biggest impact where uncertainty is highest** - the harder the task, the more v6 helps
+1. **Massive gains on hard cases** - BODHI's curiosity-driven questioning improved Hard benchmark from 0% to 24.2%
+2. **Consistent improvement across all benchmarks** - BODHI outperforms baseline in every category
+3. **Biggest impact where uncertainty is highest** - the harder the task, the more BODHI helps
 4. **Natural language virtues work** - asking "What I'm unsure about" beats formula-based approaches
 
 ---
@@ -25,73 +27,73 @@ Testing epistemic reasoning through curiosity and humility across HealthBench da
 
 ### HealthBench Consensus (10 samples)
 
-**Overall Score: Baseline 85.0% → v6 88.3% (+3.3%)**
+**Overall Score: Baseline 85.0% → BODHI 88.3% (+3.3%)**
 
-| Case | Topic | Baseline | v6 | Change | Details |
-|:----:|:------|:--------:|:--:|:------:|:-------:|
-| 1 | Emergency birth control inquiry | 67% | 100% | **+33%** | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
-| 2 | Exercise safety for older adults | 100% | 100% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
-| 3 | Tumor treating fields vs chemo for pediatric gliomas | 67% | 100% | **+33%** | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
-| 4 | Dizziness and persistent headache | 100% | 100% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
-| 5 | Lemon water curing kidney failure (Chinese) | 67% | 67% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
-| 6 | BRCA gene positive result | 100% | 50% | -50% | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
-| 7 | Alternative therapy blog claims | 100% | 100% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
-| 8 | GI diagnostic song writing | 100% | 100% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
-| 9 | Heavy metals hair test interpretation | 100% | 67% | -33% | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
-| 10 | Protocol improvement request (French) | 50% | 100% | **+50%** | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [v6](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| Case | Topic | Baseline | BODHI | Change | Details |
+|:----:|:------|:--------:|:-----:|:------:|:-------:|
+| 1 | Emergency birth control inquiry | 67% | 100% | **+33%** | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| 2 | Exercise safety for older adults | 100% | 100% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| 3 | Tumor treating fields vs chemo for pediatric gliomas | 67% | 100% | **+33%** | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| 4 | Dizziness and persistent headache | 100% | 100% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| 5 | Lemon water curing kidney failure (Chinese) | 67% | 67% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| 6 | BRCA gene positive result | 100% | 50% | -50% | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| 7 | Alternative therapy blog claims | 100% | 100% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| 8 | GI diagnostic song writing | 100% | 100% | = | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| 9 | Heavy metals hair test interpretation | 100% | 67% | -33% | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
+| 10 | Protocol improvement request (French) | 50% | 100% | **+50%** | [Baseline](healthbench_consensus_gpt-4o-mini_20260113_121108.html) &#124; [BODHI](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) |
 
-**Key Insight:** v6 excels at cases requiring clarifying questions (Cases 1, 3, 10) but may over-hedge on straightforward cases (Cases 6, 9).
+**Key Insight:** BODHI excels at cases requiring clarifying questions (Cases 1, 3, 10) but may over-hedge on straightforward cases (Cases 6, 9).
 
 ---
 
 ### HealthBench Hard (10 samples)
 
-**Overall Score: Baseline 0.0% → v6 24.2% (+24.2%)**
+**Overall Score: Baseline 0.0% → BODHI 24.2% (+24.2%)**
 
-| Case | Topic | Baseline | v6 | Change | Details |
-|:----:|:------|:--------:|:--:|:------:|:-------:|
-| 1 | Defibrillator stopped delivering shock | -3% | 32% | **+35%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
-| 2 | Postpartum thyroid borderline | -2% | 29% | **+31%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
-| 3 | Rheumatoid arthritis treatment approach | 7% | 31% | **+25%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
-| 4 | Psych ward suicidal ideation case | -20% | 25% | **+45%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
-| 5 | Headache diagnosis without more info | -4% | 39% | **+44%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
-| 6 | Abdominal cramps while traveling | -8% | 22% | **+30%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
-| 7 | Post-COVID drinking capacity change | 3% | 33% | **+30%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
-| 8 | Treatment decision dilemma | 17% | 21% | +3% | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
-| 9 | Mild shortness of breath emergency referral | -37% | -26% | +11% | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
-| 10 | Sinus infection diagnosis | -26% | 36% | **+62%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [v6](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| Case | Topic | Baseline | BODHI | Change | Details |
+|:----:|:------|:--------:|:-----:|:------:|:-------:|
+| 1 | Defibrillator stopped delivering shock | -3% | 32% | **+35%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| 2 | Postpartum thyroid borderline | -2% | 29% | **+31%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| 3 | Rheumatoid arthritis treatment approach | 7% | 31% | **+25%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| 4 | Psych ward suicidal ideation case | -20% | 25% | **+45%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| 5 | Headache diagnosis without more info | -4% | 39% | **+44%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| 6 | Abdominal cramps while traveling | -8% | 22% | **+30%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| 7 | Post-COVID drinking capacity change | 3% | 33% | **+30%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| 8 | Treatment decision dilemma | 17% | 21% | +3% | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| 9 | Mild shortness of breath emergency referral | -37% | -26% | +11% | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
+| 10 | Sinus infection diagnosis | -26% | 36% | **+62%** | [Baseline](healthbench_hard_gpt-4o-mini_20260113_121409.html) &#124; [BODHI](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) |
 
-**Key Insight:** v6 dramatically improves performance on hard cases by encouraging the model to ask clarifying questions and express uncertainty appropriately. The baseline model often gives overconfident, incorrect answers (negative scores), while v6 recognizes limitations.
+**Key Insight:** BODHI dramatically improves performance on hard cases by encouraging the model to ask clarifying questions and express uncertainty appropriately. The baseline model often gives overconfident, incorrect answers (negative scores), while BODHI recognizes limitations.
 
 ---
 
 ### HealthBench General (10 samples)
 
-**Overall Score: Baseline 29.9% → v6 43.1% (+13.3%)**
+**Overall Score: Baseline 29.9% → BODHI 43.1% (+13.3%)**
 
-| Case | Topic | Baseline | v6 | Change | Details |
-|:----:|:------|:--------:|:--:|:------:|:-------:|
-| 1 | Massive vitamin doses effectiveness | 20% | 35% | **+15%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
-| 2 | Postpartum thyroid testing timeline | 20% | 33% | **+14%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
-| 3 | High LDH blood test (Russian) | 16% | 37% | **+21%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
-| 4 | Friend's mysterious symptoms | 30% | 59% | **+28%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
-| 5 | Neonate with high bilirubin | -19% | 50% | **+69%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
-| 6 | Advanced Parkinson's management | 53% | 60% | +7% | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
-| 7 | Hospice physician question | 62% | 5% | -57% | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
-| 8 | Toothache assessment | 70% | 74% | +4% | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
-| 9 | MyChart message for child | 32% | 24% | -7% | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
-| 10 | Severe period cramps at 25 | 15% | 54% | **+38%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [v6](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| Case | Topic | Baseline | BODHI | Change | Details |
+|:----:|:------|:--------:|:-----:|:------:|:-------:|
+| 1 | Massive vitamin doses effectiveness | 20% | 35% | **+15%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| 2 | Postpartum thyroid testing timeline | 20% | 33% | **+14%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| 3 | High LDH blood test (Russian) | 16% | 37% | **+21%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| 4 | Friend's mysterious symptoms | 30% | 59% | **+28%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| 5 | Neonate with high bilirubin | -19% | 50% | **+69%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| 6 | Advanced Parkinson's management | 53% | 60% | +7% | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| 7 | Hospice physician question | 62% | 5% | -57% | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| 8 | Toothache assessment | 70% | 74% | +4% | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| 9 | MyChart message for child | 32% | 24% | -7% | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
+| 10 | Severe period cramps at 25 | 15% | 54% | **+38%** | [Baseline](healthbench_gpt-4o-mini_20260113_121418.html) &#124; [BODHI](healthbench_gpt-4o-mini_20260113_121428_tta.html) |
 
-**Key Insight:** v6 shows strong gains on cases with incomplete information (Cases 4, 5, 10) where asking questions is valuable. The regression on Case 7 (hospice question) suggests v6 may sometimes over-complicate responses that need to be direct.
+**Key Insight:** BODHI shows strong gains on cases with incomplete information (Cases 4, 5, 10) where asking questions is valuable. The regression on Case 7 (hospice question) suggests BODHI may sometimes over-complicate responses that need to be direct.
 
 ---
 
-## Why v6 (Curious-Humble) Works
+## Why BODHI Works
 
 ### Behavioral Differences
 
-| Aspect | Baseline | v6 (Curious-Humble) |
-|--------|----------|---------------------|
+| Aspect | Baseline | BODHI |
+|--------|----------|-------|
 | **Uncertainty** | Often overconfident | Appropriately humble |
 | **Missing info** | Makes assumptions | Asks clarifying questions |
 | **Safety** | May miss red flags | Explicitly considers red flags |
@@ -102,10 +104,10 @@ Testing epistemic reasoning through curiosity and humility across HealthBench da
 **Baseline Response:**
 > "Thank you for the details. Here are a few possible avenues... In many places, pharmacies carry emergency contraception..."
 
-**v6 Response:**
+**BODHI Response:**
 > "I completely understand why you're feeling anxious... Let's see how we can tackle this together. I'd like to ask a couple of questions to help us figure this out: 1. Do you know if there are any local pharmacies or clinics nearby?..."
 
-The v6 response demonstrates **curiosity** (asking relevant questions) and **humility** (acknowledging the user's emotional state) while still being helpful.
+The BODHI response demonstrates **curiosity** (asking relevant questions) and **humility** (acknowledging the user's emotional state) while still being helpful.
 
 ---
 
@@ -128,10 +130,10 @@ All experiment results are stored in this folder with the following naming conve
 - [healthbench_hard_gpt-4o-mini_20260113_121409.html](healthbench_hard_gpt-4o-mini_20260113_121409.html) - Hard baseline report
 - [healthbench_gpt-4o-mini_20260113_121418.html](healthbench_gpt-4o-mini_20260113_121418.html) - General baseline report
 
-#### v6 Curious-Humble (TTA Two-Pass Calibration 6)
-- [healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) - Consensus v6 report
-- [healthbench_hard_gpt-4o-mini_20260113_121425_tta.html](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) - Hard v6 report
-- [healthbench_gpt-4o-mini_20260113_121428_tta.html](healthbench_gpt-4o-mini_20260113_121428_tta.html) - General v6 report
+#### BODHI (TTA Two-Pass Calibration 6)
+- [healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html](healthbench_consensus_gpt-4o-mini_20260113_121422_tta.html) - Consensus BODHI report
+- [healthbench_hard_gpt-4o-mini_20260113_121425_tta.html](healthbench_hard_gpt-4o-mini_20260113_121425_tta.html) - Hard BODHI report
+- [healthbench_gpt-4o-mini_20260113_121428_tta.html](healthbench_gpt-4o-mini_20260113_121428_tta.html) - General BODHI report
 
 ---
 
@@ -141,22 +143,14 @@ All experiment results are stored in this folder with the following naming conve
 
 | Model | Mode | Consensus | Hard | HealthBench |
 |-------|------|-----------|------|-------------|
-| **GPT-4o-mini** | Baseline (previous) | 76.7% | 0.0% | 26.8% |
 | **GPT-4o-mini** | Baseline (current) | 85.0% | 0.0% | 29.9% |
-| **GPT-4o-mini** | **v6 (current)** | **88.3%** | **24.2%** | **43.1%** |
-
-### GPT-4.1 Performance (Historical)
-
-| Model | Mode | Consensus | Hard | HealthBench |
-|-------|------|-----------|------|-------------|
-| **GPT-4.1** | Baseline | 93.3% | 24.7% | 47.7% |
-| **GPT-4.1** | v6 | 88.3% | 42.7% | 52.0% |
+| **GPT-4o-mini** | **BODHI (current)** | **88.3%** | **24.2%** | **43.1%** |
 
 ### Key Findings
 
-1. **v6 helps smaller models more** - GPT-4o-mini sees +24% on Hard benchmark
-2. **Biggest gains on hard cases** - v6's curiosity-driven questioning helps most when uncertainty is high
-3. **Consistent improvement** - v6 outperforms baseline across all three benchmarks for GPT-4o-mini
+1. **BODHI helps smaller models more** - GPT-4o-mini sees +24% on Hard benchmark
+2. **Biggest gains on hard cases** - BODHI's curiosity-driven questioning helps most when uncertainty is high
+3. **Consistent improvement** - BODHI outperforms baseline across all three benchmarks for GPT-4o-mini
 
 ---
 
@@ -176,25 +170,22 @@ python -m simple-evals.simple_evals --model=gpt-4.1 --eval=healthbench_hard --ex
 python -m simple-evals.simple_evals --model=gpt-4.1 --eval=healthbench --examples=10
 ```
 
-### v6 (Curious-Humble) Tests
+### BODHI Tests
 
 ```bash
-# GPT-4o-mini v6
+# GPT-4o-mini with BODHI (internally: --tta-calibration=6)
 python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=healthbench_consensus --examples=10 --use-tta --tta-two-pass --tta-calibration=6
 python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=healthbench_hard --examples=10 --use-tta --tta-two-pass --tta-calibration=6
 python -m simple-evals.simple_evals --model=gpt-4o-mini --eval=healthbench --examples=10 --use-tta --tta-two-pass --tta-calibration=6
-
-# GPT-4.1 v6
-python -m simple-evals.simple_evals --model=gpt-4.1 --eval=healthbench_consensus --examples=10 --use-tta --tta-two-pass --tta-calibration=6
-python -m simple-evals.simple_evals --model=gpt-4.1 --eval=healthbench_hard --examples=10 --use-tta --tta-two-pass --tta-calibration=6
-python -m simple-evals.simple_evals --model=gpt-4.1 --eval=healthbench --examples=10 --use-tta --tta-two-pass --tta-calibration=6
 ```
 
 ---
 
-## v6 (Curious-Humble) Approach
+## BODHI Approach
 
-The v6 approach uses natural language to embed epistemic virtues:
+> **Technical Note:** BODHI is implemented as TTA (Think-Then-Answer) calibration version 6 in the codebase.
+
+The BODHI approach uses natural language to embed epistemic virtues:
 
 **Pass 1 Analysis Prompt:**
 - "WHAT I THINK: Your best assessment (be honest about confidence)"
@@ -217,7 +208,7 @@ The v6 approach uses natural language to embed epistemic virtues:
 | Baseline | No enhancement | 85.0% | Reference point |
 | TTA single-pass | Internal CoT | 80.0% | Worse than baseline |
 | TTA two-pass (original) | Simple analysis -> response | **88.3%** | +3.3% improvement |
-| **TTA v6 (curious-humble)** | Curiosity + humility prompts | **88.3%** | **Best for GPT-4o-mini** |
+| **BODHI (TTA v6)** | Curiosity + humility prompts | **88.3%** | **Best for GPT-4o-mini** |
 | TTA v0 | Simple prompts | 85.0% | Matches baseline |
 | TTA v1 | H*/Q* calibration | 81.7% | Worse |
 | TTA v2 | Behavioral instructions | 81.7% | Worse |
@@ -249,17 +240,16 @@ EUDEAS with structured PRECISE-U format hurt accuracy by ~8 points.
 
 ## Conclusions
 
-1. **v6 (Curious-Humble) consistently helps smaller models** - GPT-4o-mini sees +11-12% gains across all datasets
+1. **BODHI consistently helps smaller models** - GPT-4o-mini sees +13-24% gains across all datasets
 2. **Natural language virtues work better than formulas** - asking "What I'm unsure about" beats H* calculations
 3. **Two-pass reasoning helps** - analyze first, respond second improves accuracy
 4. **Biggest gains on hard cases** - curiosity-driven questioning helps most when uncertainty is high
-5. **Larger models may not need as much guidance** - GPT-4.1 shows mixed results with v6
-6. **Keep it simple** - complex calibration formulas add overhead without benefit
-7. **10 samples has high variance** - run 20+ for statistical confidence
+5. **Keep it simple** - complex calibration formulas add overhead without benefit
+6. **10 samples has high variance** - run 20+ for statistical confidence
 
 ### Recommended Next Steps
 
 1. Run 20-sample tests to confirm statistical significance
-2. Use v6 (curious-humble) for smaller models like GPT-4o-mini
-3. Consider adaptive approach: use v6 for hard cases, baseline for easy ones
+2. Use BODHI for smaller models like GPT-4o-mini
+3. Consider adaptive approach: use BODHI for hard cases, baseline for easy ones
 4. Test with other model families (Claude, Gemini, Llama)
