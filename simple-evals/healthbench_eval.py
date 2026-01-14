@@ -298,6 +298,8 @@ class HealthBenchEval(Eval):
         run_reference_completions: bool = False,
         n_threads: int = 120,
         subset_name: Literal["hard", "consensus"] | None = None,
+        # If set, filter examples to only those with prompt_ids in this list
+        sample_ids: list[str] | None = None,
     ):
         if run_reference_completions:
             assert physician_completions_mode is not None, (
@@ -329,6 +331,13 @@ class HealthBenchEval(Eval):
                 examples = [json.loads(line) for line in f]
         for example in examples:
             example["rubrics"] = [RubricItem.from_dict(d) for d in example["rubrics"]]
+
+        # Filter by sample_ids if provided
+        if sample_ids is not None:
+            sample_ids_set = set(sample_ids)
+            original_count = len(examples)
+            examples = [ex for ex in examples if ex["prompt_id"] in sample_ids_set]
+            print(f"Filtered to {len(examples)} examples from {original_count} (using {len(sample_ids)} sample IDs)")
 
         rng = random.Random(0)
 

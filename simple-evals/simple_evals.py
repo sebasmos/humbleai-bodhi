@@ -80,6 +80,18 @@ def main():
         action="store_true",
         help="Enable BODHI mode using the bodhi-llm pip package for epistemic reasoning with curiosity and humility.",
     )
+    parser.add_argument(
+        "--sample-file",
+        type=str,
+        default=None,
+        help="Path to JSON file containing sample IDs to evaluate (for HealthBench). File should have 'prompt_ids' array.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Directory to save output files (JSON, HTML). If not specified, saves to Results/.",
+    )
 
     args = parser.parse_args()
 
@@ -550,6 +562,14 @@ def main():
     # )
     # ^^^ used for fuzzy matching, just for math
 
+    # Load sample IDs from file if provided
+    sample_ids = None
+    if args.sample_file:
+        with open(args.sample_file, "r") as f:
+            sample_data = json.load(f)
+            sample_ids = sample_data.get("prompt_ids", [])
+            print(f"Loaded {len(sample_ids)} sample IDs from {args.sample_file}")
+
     def get_evals(eval_name, debug_mode):
         num_examples = (
             args.examples if args.examples is not None else (5 if debug_mode else None)
@@ -597,6 +617,7 @@ def main():
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
                     subset_name=None,
+                    sample_ids=sample_ids,
                 )
             case "healthbench_hard":
                 return HealthBenchEval(
@@ -605,6 +626,7 @@ def main():
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
                     subset_name="hard",
+                    sample_ids=sample_ids,
                 )
             case "healthbench_consensus":
                 return HealthBenchEval(
@@ -613,6 +635,7 @@ def main():
                     n_repeats=args.n_repeats or 1,
                     n_threads=args.n_threads or 1,
                     subset_name="consensus",
+                    sample_ids=sample_ids,
                 )
             case "healthbench_meta":
                 return HealthBenchMetaEval(
@@ -667,10 +690,13 @@ def main():
     now = datetime.now()
     date_str = now.strftime("%Y%m%d_%H%M%S")
 
-    # Save results to Results folder
+    # Save results to Results folder (or custom output-dir if provided)
     import os
-    results_folder = "Results"
-    results_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), results_folder)
+    if args.output_dir:
+        results_dir = args.output_dir
+    else:
+        results_folder = "Results"
+        results_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), results_folder)
     os.makedirs(results_dir, exist_ok=True)
 
     for model_name, sampler in models.items():
