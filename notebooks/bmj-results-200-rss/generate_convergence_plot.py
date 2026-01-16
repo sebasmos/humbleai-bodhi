@@ -145,4 +145,5 @@ pdf_path = Path(__file__).parent / "figures" / "figure1_convergence.pdf"
 plt.savefig(pdf_path, bbox_inches='tight', facecolor='white')
 print(f"Saved: {pdf_path}")
 
-plt.show()
+# plt.show()  # Commented out for headless execution
+plt.close()
