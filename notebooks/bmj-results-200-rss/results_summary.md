@@ -31,6 +31,8 @@ This document summarizes the results of multi-seed validation comparing **BODHI 
 
 *Figure 1: Context-seeking rate comparison showing mean ± standard deviation across 5 seeds.*
 
+**Notebook**: See [convergence_analysis.ipynb](convergence_analysis.ipynb) for the full analysis code and interactive visualization.
+
 ---
 
 ## Individual Seed Results
