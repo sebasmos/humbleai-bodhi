@@ -1,0 +1,67 @@
+{
+  "description": "Multi-seed random sampling metadata for HealthBench hard dataset",
+  "num_seeds": 5,
+  "sample_size": 200,
+  "strategy": "rs",
+  "strategy_name": "Random Sampling",
+  "base_seed": 42,
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "source": "https://openaipublic.blob.core.windows.net/simple-evals/healthbench/hard_2025-05-08-21-00-10.jsonl",
+  "stratification": "none",
+  "files": [
+    "hard_200_sample_seed42.json",
+    "hard_200_sample_seed43.json",
+    "hard_200_sample_seed44.json",
+    "hard_200_sample_seed45.json",
+    "hard_200_sample_seed46.json"
+  ],
+  "overlap_stats": {
+    "average_overlap": 40.6,
+    "average_overlap_pct": 20.3,
+    "min_overlap": 32,
+    "max_overlap": 51
+  },
+  "theme_variance": {
+    "global_health": {
+      "original_pct": 28.000000000000004,
+      "mean_pct": 28.3,
+      "std_pct": 2.15870331449229
+    },
+    "context_seeking": {
+      "original_pct": 17.9,
+      "mean_pct": 17.6,
+      "std_pct": 3.215587038162705
+    },
+    "hedging": {
+      "original_pct": 16.7,
+      "mean_pct": 16.4,
+      "std_pct": 2.0346989949375804
+    },
+    "health_data_tasks": {
+      "original_pct": 11.5,
+      "mean_pct": 11.6,
+      "std_pct": 0.8
+    },
+    "communication": {
+      "original_pct": 11.1,
+      "mean_pct": 11.5,
+      "std_pct": 2.213594362117865
+    },
+    "complex_responses": {
+      "original_pct": 8.200000000000001,
+      "mean_pct": 8.8,
+      "std_pct": 1.1661903789690602
+    },
+    "emergency_referrals": {
+      "original_pct": 6.6000000000000005,
+      "mean_pct": 5.8,
+      "std_pct": 0.5099019513592784
+    }
+  }
+}
