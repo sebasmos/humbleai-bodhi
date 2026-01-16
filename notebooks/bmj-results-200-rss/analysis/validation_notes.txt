@@ -1,0 +1,39 @@
+================================================================================
+VALIDATION NOTES
+================================================================================
+
+METHODOLOGY
+-----------
+1. Stratified random sampling (RSS) used for reproducibility
+2. Five different random seeds (42-46) to assess variance
+3. 200 samples per seed from HealthBench Hard (1000 total cases)
+4. Same sample sets used for both Baseline and BODHI evaluations
+
+DATA QUALITY CHECKS
+-------------------
+- All 5 baseline evaluations completed successfully: YES
+- All 5 BODHI evaluations completed successfully: YES
+- Sample counts verified (200 per evaluation): YES
+- No missing data in key metrics: YES
+
+STATISTICAL NOTES
+-----------------
+- Sample size: 5 seeds × 200 samples = 1000 total evaluations per model
+- Inter-seed variance indicates robustness of findings
+- Standard deviation provides measure of consistency
+
+LIMITATIONS
+-----------
+1. Single model tested (GPT-4o-mini)
+2. Single benchmark (HealthBench Hard)
+3. No formal statistical significance testing (would require larger n)
+
+REPRODUCIBILITY
+---------------
+- Random seeds documented: [42, 43, 44, 45, 46]
+- Sample files saved: data/data-5-seeds-200RSS/hard_200_sample_seed{42-46}.json
+- Full results saved: Results/results-5-seeds-200rss/
+- BODHI version: 0.1.3 (via bodhi-llm pip package)
+
+Generated: 2026-01-16 19:42:45
+================================================================================

@@ -1,0 +1,141 @@
+{
+  "metadata": {
+    "created": "2026-01-16T19:42:45.287170",
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "samples_per_seed": 200,
+    "total_samples": 1000,
+    "model": "gpt-4o-mini",
+    "bodhi_version": "0.1.3",
+    "benchmark": "HealthBench Hard"
+  },
+  "context_seeking": {
+    "metric": "cluster:context_seeking_not-enough-context_context_seeking",
+    "baseline": {
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "per_seed": {
+        "42": 0.0,
+        "43": 0.0,
+        "44": 0.0,
+        "45": 0.0,
+        "46": 0.0
+      }
+    },
+    "bodhi": {
+      "mean": 73.53571428571428,
+      "std": 4.760654597799184,
+      "min": 66.66666666666666,
+      "max": 81.25,
+      "per_seed": {
+        "42": 71.42857142857143,
+        "43": 75.0,
+        "44": 81.25,
+        "45": 66.66666666666666,
+        "46": 73.33333333333333
+      }
+    },
+    "improvement": {
+      "mean_pp": 73.53571428571428,
+      "min_pp": 66.66666666666666,
+      "max_pp": 81.25
+    }
+  },
+  "all_metrics": {
+    "score": {
+      "display_name": "Overall Score",
+      "baseline_mean": 0.0,
+      "baseline_std": 0.0,
+      "bodhi_mean": 2.2171357486975642,
+      "bodhi_std": 1.7995797516119991,
+      "improvement_pp": 2.2171357486975642
+    },
+    "axis:accuracy": {
+      "display_name": "Axis: Accuracy",
+      "baseline_mean": 11.548098856512249,
+      "baseline_std": 2.8250435289728744,
+      "bodhi_mean": 15.229478830605055,
+      "bodhi_std": 2.9183443069429478,
+      "improvement_pp": 3.681379974092806
+    },
+    "axis:completeness": {
+      "display_name": "Axis: Completeness",
+      "baseline_mean": 0.0,
+      "baseline_std": 0.0,
+      "bodhi_mean": 0.0,
+      "bodhi_std": 0.0,
+      "improvement_pp": 0.0
+    },
+    "axis:context_awareness": {
+      "display_name": "Axis: Context Awareness",
+      "baseline_mean": 0.0,
+      "baseline_std": 0.0,
+      "bodhi_mean": 1.6484768324963077,
+      "bodhi_std": 2.035130214811813,
+      "improvement_pp": 1.6484768324963077
+    },
+    "axis:communication_quality": {
+      "display_name": "Axis: Communication Quality",
+      "baseline_mean": 62.69498775598339,
+      "baseline_std": 4.076008107718074,
+      "bodhi_mean": 51.36695816181916,
+      "bodhi_std": 5.803046944055181,
+      "improvement_pp": -11.328029594164228
+    },
+    "axis:instruction_following": {
+      "display_name": "Axis: Instruction Following",
+      "baseline_mean": 36.1868129846618,
+      "baseline_std": 9.986477298960635,
+      "bodhi_mean": 35.71642538262583,
+      "bodhi_std": 10.919260171242076,
+      "improvement_pp": -0.4703876020359701
+    },
+    "theme:context_seeking": {
+      "display_name": "Theme: Context Seeking",
+      "baseline_mean": 0.014405584290218473,
+      "baseline_std": 0.028811168580436943,
+      "bodhi_mean": 7.050428956206964,
+      "bodhi_std": 1.3715021322715324,
+      "improvement_pp": 7.0360233719167455
+    },
+    "cluster:context_seeking_not-enough-context_context_seeking": {
+      "display_name": "Context-Seeking Rate (not-enough-context)",
+      "baseline_mean": 0.0,
+      "baseline_std": 0.0,
+      "bodhi_mean": 73.53571428571428,
+      "bodhi_std": 4.760654597799184,
+      "improvement_pp": 73.53571428571428
+    },
+    "cluster:context_seeking_not-enough-context_helpful_safe": {
+      "display_name": "Helpful & Safe (not-enough-context)",
+      "baseline_mean": 50.25,
+      "baseline_std": 16.8605390713873,
+      "bodhi_mean": 89.47619047619047,
+      "bodhi_std": 5.095933419400805,
+      "improvement_pp": 39.22619047619047
+    },
+    "theme:emergency_referrals": {
+      "display_name": "Theme: Emergency Referrals",
+      "baseline_mean": 0.1667343408497131,
+      "baseline_std": 0.3334686816994262,
+      "bodhi_mean": 15.894525032177835,
+      "bodhi_std": 4.311591188672507,
+      "improvement_pp": 15.727790691328122
+    },
+    "theme:hedging": {
+      "display_name": "Theme: Hedging",
+      "baseline_mean": 0.0,
+      "baseline_std": 0.0,
+      "bodhi_mean": 4.110653234768288,
+      "bodhi_std": 4.498876487066248,
+      "improvement_pp": 4.110653234768288
+    }
+  }
+}
