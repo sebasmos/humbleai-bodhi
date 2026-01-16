@@ -73,14 +73,6 @@ Results/
     └── (same structure as RSS)
 ```
 
-## Time Estimates
-
-| Pipeline | Evaluations | Est. Time |
-|----------|-------------|-----------|
-| RSS only | 10 | ~3 hrs |
-| RS only | 10 | ~3 hrs |
-| Full (both) | 20 | ~6 hrs |
-
 ## Verification
 
 After completion, the scripts automatically verify file counts. For manual verification:
@@ -106,28 +98,6 @@ done
 | `scripts/run_rss_eval.sh` | Run RSS (stratified) evaluations |
 | `scripts/run_rs_eval.sh` | Run RS (random) evaluations |
 | `scripts/run_all_eval.sh` | Run both pipelines sequentially |
-
-## Progress Tracking
-
-### RSS Evaluations
-
-| Seed | Baseline | BODHI v0.1.3 |
-|------|----------|--------------|
-| 42 | [ ] | [ ] |
-| 43 | [ ] | [ ] |
-| 44 | [x] | [x] |
-| 45 | [ ] | [ ] |
-| 46 | [ ] | [ ] |
-
-### RS Evaluations
-
-| Seed | Baseline | BODHI v0.1.3 |
-|------|----------|--------------|
-| 42 | [ ] | [ ] |
-| 43 | [ ] | [ ] |
-| 44 | [ ] | [ ] |
-| 45 | [ ] | [ ] |
-| 46 | [ ] | [ ] |
 
 ## Analysis
 
