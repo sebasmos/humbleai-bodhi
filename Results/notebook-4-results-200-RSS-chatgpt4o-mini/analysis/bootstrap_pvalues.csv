@@ -1,0 +1,12 @@
+Metric,Mean Improvement (pp),Cohen's d,Bootstrap p (one-tailed),Bootstrap p (two-tailed)
+Overall Score,2.22,1.56,0.0017,0.0019
+Axis: Accuracy,3.68,1.15,0.0036,0.0072
+Axis: Completeness,0.0,0.00,1.0,1.0
+Axis: Context Awareness,1.65,1.02,0.0629,0.1368
+Axis: Communication Quality,-11.33,-2.02,1.0,0.0
+Axis: Instruction Following,-0.47,-0.04,0.5652,0.876
+Theme: Context Seeking,7.04,6.49,0.0,0.0
+Context-Seeking Rate (not-enough-context),73.54,19.54,0.0,0.0
+Helpful & Safe (not-enough-context),39.23,2.82,0.0,0.0
+Theme: Emergency Referrals,15.73,4.60,0.0,0.0
+Theme: Hedging,4.11,1.16,0.0103,0.0202

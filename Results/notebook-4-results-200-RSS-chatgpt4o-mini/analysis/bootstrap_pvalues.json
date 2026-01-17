@@ -1,0 +1,120 @@
+{
+  "metadata": {
+    "method": "Bootstrap p-value (shift to null, resample, compute proportion)",
+    "n_bootstrap": 10000,
+    "seed": 42,
+    "created": "2026-01-17T11:21:02.646269"
+  },
+  "results": [
+    {
+      "metric": "Overall Score",
+      "mean_improvement_pp": 2.2171357486975642,
+      "cohens_d": 1.5584080319611557,
+      "bootstrap_p_one_tailed": 0.0017,
+      "bootstrap_p_two_tailed": 0.0019,
+      "significant_0.05": true,
+      "significant_0.01": true,
+      "significant_0.001": false
+    },
+    {
+      "metric": "Axis: Accuracy",
+      "mean_improvement_pp": 3.681379974092806,
+      "cohens_d": 1.1464633972737133,
+      "bootstrap_p_one_tailed": 0.0036,
+      "bootstrap_p_two_tailed": 0.0072,
+      "significant_0.05": true,
+      "significant_0.01": true,
+      "significant_0.001": false
+    },
+    {
+      "metric": "Axis: Completeness",
+      "mean_improvement_pp": 0.0,
+      "cohens_d": 0,
+      "bootstrap_p_one_tailed": 1.0,
+      "bootstrap_p_two_tailed": 1.0,
+      "significant_0.05": false,
+      "significant_0.01": false,
+      "significant_0.001": false
+    },
+    {
+      "metric": "Axis: Context Awareness",
+      "mean_improvement_pp": 1.6484768324963077,
+      "cohens_d": 1.0245912370162995,
+      "bootstrap_p_one_tailed": 0.0629,
+      "bootstrap_p_two_tailed": 0.1368,
+      "significant_0.05": false,
+      "significant_0.01": false,
+      "significant_0.001": false
+    },
+    {
+      "metric": "Axis: Communication Quality",
+      "mean_improvement_pp": -11.328029594164228,
+      "cohens_d": -2.0205845148929655,
+      "bootstrap_p_one_tailed": 1.0,
+      "bootstrap_p_two_tailed": 0.0,
+      "significant_0.05": true,
+      "significant_0.01": true,
+      "significant_0.001": true
+    },
+    {
+      "metric": "Axis: Instruction Following",
+      "mean_improvement_pp": -0.47038760203596724,
+      "cohens_d": -0.04020994637519737,
+      "bootstrap_p_one_tailed": 0.5652,
+      "bootstrap_p_two_tailed": 0.876,
+      "significant_0.05": false,
+      "significant_0.01": false,
+      "significant_0.001": false
+    },
+    {
+      "metric": "Theme: Context Seeking",
+      "mean_improvement_pp": 7.0360233719167455,
+      "cohens_d": 6.487762943428748,
+      "bootstrap_p_one_tailed": 0.0,
+      "bootstrap_p_two_tailed": 0.0,
+      "significant_0.05": true,
+      "significant_0.01": true,
+      "significant_0.001": true
+    },
+    {
+      "metric": "Context-Seeking Rate (not-enough-context)",
+      "mean_improvement_pp": 73.53571428571428,
+      "cohens_d": 19.538518641343206,
+      "bootstrap_p_one_tailed": 0.0,
+      "bootstrap_p_two_tailed": 0.0,
+      "significant_0.05": true,
+      "significant_0.01": true,
+      "significant_0.001": true
+    },
+    {
+      "metric": "Helpful & Safe (not-enough-context)",
+      "mean_improvement_pp": 39.22619047619048,
+      "cohens_d": 2.8169738027634517,
+      "bootstrap_p_one_tailed": 0.0,
+      "bootstrap_p_two_tailed": 0.0,
+      "significant_0.05": true,
+      "significant_0.01": true,
+      "significant_0.001": true
+    },
+    {
+      "metric": "Theme: Emergency Referrals",
+      "mean_improvement_pp": 15.727790691328124,
+      "cohens_d": 4.600394393804692,
+      "bootstrap_p_one_tailed": 0.0,
+      "bootstrap_p_two_tailed": 0.0,
+      "significant_0.05": true,
+      "significant_0.01": true,
+      "significant_0.001": true
+    },
+    {
+      "metric": "Theme: Hedging",
+      "mean_improvement_pp": 4.110653234768288,
+      "cohens_d": 1.1557576146291053,
+      "bootstrap_p_one_tailed": 0.0103,
+      "bootstrap_p_two_tailed": 0.0202,
+      "significant_0.05": true,
+      "significant_0.01": false,
+      "significant_0.001": false
+    }
+  ]
+}
