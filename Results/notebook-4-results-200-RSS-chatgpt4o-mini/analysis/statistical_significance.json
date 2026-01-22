@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "created": "2026-01-17T12:51:39.027683",
+    "created": "2026-01-22T00:27:58.684401",
     "n_seeds": 5,
     "seeds": [
       42,
@@ -35,7 +35,7 @@
       "significant": true
     },
     {
-      "metric": "Axis: Accuracy",
+      "metric": "Accuracy",
       "baseline_mean": 11.548098856512249,
       "baseline_std": 3.1584946850896216,
       "bodhi_mean": 15.229478830605055,
@@ -51,7 +51,7 @@
       "significant": true
     },
     {
-      "metric": "Axis: Completeness",
+      "metric": "Completeness",
       "baseline_mean": 0.0,
       "baseline_std": 0.0,
       "bodhi_mean": 0.0,
@@ -67,7 +67,7 @@
       "significant": false
     },
     {
-      "metric": "Axis: Context Awareness",
+      "metric": "Context Awareness",
       "baseline_mean": 0.0,
       "baseline_std": 0.0,
       "bodhi_mean": 1.6484768324963077,
@@ -83,7 +83,7 @@
       "significant": false
     },
     {
-      "metric": "Axis: Communication Quality",
+      "metric": "Communication Quality",
       "baseline_mean": 62.69498775598339,
       "baseline_std": 4.55711560284895,
       "bodhi_mean": 51.36695816181916,
@@ -99,7 +99,7 @@
       "significant": false
     },
     {
-      "metric": "Axis: Instruction Following",
+      "metric": "Instruction Following",
       "baseline_mean": 36.1868129846618,
       "baseline_std": 11.165221048117235,
       "bodhi_mean": 35.71642538262583,
@@ -115,7 +115,7 @@
       "significant": false
     },
     {
-      "metric": "Theme: Context Seeking",
+      "metric": "Context Seeking (Theme)",
       "baseline_mean": 0.014405584290218473,
       "baseline_std": 0.03221186572853156,
       "bodhi_mean": 7.050428956206964,
@@ -131,7 +131,7 @@
       "significant": true
     },
     {
-      "metric": "Context-Seeking Rate (not-enough-context)",
+      "metric": "Context-Seeking Rate",
       "baseline_mean": 0.0,
       "baseline_std": 0.0,
       "bodhi_mean": 73.53571428571428,
@@ -147,7 +147,7 @@
       "significant": true
     },
     {
-      "metric": "Helpful & Safe (not-enough-context)",
+      "metric": "Helpful & Safe",
       "baseline_mean": 50.25,
       "baseline_std": 18.850655750456593,
       "bodhi_mean": 89.47619047619047,
@@ -163,7 +163,7 @@
       "significant": true
     },
     {
-      "metric": "Theme: Emergency Referrals",
+      "metric": "Emergency Referrals",
       "baseline_mean": 0.1667343408497131,
       "baseline_std": 0.37282932032357846,
       "bodhi_mean": 15.894525032177835,
@@ -179,7 +179,7 @@
       "significant": true
     },
     {
-      "metric": "Theme: Hedging",
+      "metric": "Hedging",
       "baseline_mean": 0.0,
       "baseline_std": 0.0,
       "bodhi_mean": 4.110653234768288,

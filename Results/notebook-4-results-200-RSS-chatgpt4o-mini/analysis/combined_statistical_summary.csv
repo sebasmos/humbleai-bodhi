@@ -1,4 +1,4 @@
 Analysis,Metric,Baseline,BODHI,Difference,Test,p-value,Sig.
-Seed-Level Bootstrap (n=5),Overall Score,0.0%,2.2%,+2.2pp,Bootstrap,0.0019,**
+Seed-Level Bootstrap (n=5),Overall Score,0.0%,2.2%,+2.2pp,Bootstrap CI,See CI,✓
 Case-Level (n=1000),Overall Score,-5.3%,2.1%,+7.4pp,Paired t-test,<0.0001,***
 Case-Level (n=1000),Overall Score,-5.3%,2.1%,+7.4pp,Mixed-Effects,<0.0001,***
